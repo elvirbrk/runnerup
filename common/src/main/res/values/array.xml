@@ -50,6 +50,30 @@
     <item>Orienteering</item>
     <item>Walking</item>
   </string-array>
+    <string-array name="healthDataTypes">
+        <item>Weight</item>
+        <item>Height</item>
+        <item>Heart rate</item>
+        <item>Blood pressure</item>
+        <item>Blood glucose</item>
+    </string-array>
+    <string-array name="healthDataValues">
+        <item>Weight</item>
+        <item>Height</item>
+        <item>Heart rate</item>
+        <item>Heart rate irregular</item>
+        <item>Blood pressure (SYS)</item>
+        <item>Blood pressure (DIA)</item>
+        <item>Blood glucose</item>
+    </string-array>
+  <string-array name="muteEntries">
+    <item>No</item>
+    <item>Yes</item>
+  </string-array>
+  <string-array name="muteValues">
+    <item>no</item>
+    <item>yes</item>
+  </string-array>
   <string-array name="types">
     <item>Time</item>
     <item>Distance</item>

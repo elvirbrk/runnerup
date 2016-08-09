@@ -97,6 +97,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
     final static String TAB_INTERVAL = "interval";
     final static String TAB_ADVANCED = "advanced";
     final static String TAB_MANUAL = "manual";
+    final static String TAB_HEALTH = "health";
 
     boolean skipStopGps = false;
     Tracker mTracker = null;
@@ -197,6 +198,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
         tabHost = (TabHost) findViewById(R.id.tabhost_start);
         tabHost.setup();
+
         TabSpec tabSpec = tabHost.newTabSpec(TAB_BASIC);
         tabSpec.setIndicator(WidgetUtil.createHoloTabIndicator(this, getString(R.string.Basic)));
         tabSpec.setContent(R.id.tab_basic);
@@ -216,6 +218,12 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         tabSpec.setIndicator(WidgetUtil.createHoloTabIndicator(this, getString(R.string.Manual)));
         tabSpec.setContent(R.id.tab_manual);
         tabHost.addTab(tabSpec);
+
+        tabSpec = tabHost.newTabSpec(TAB_HEALTH);
+        tabSpec.setIndicator(WidgetUtil.createHoloTabIndicator(this, getString(R.string.Health)));
+        tabSpec.setContent(R.id.tab_health);
+        tabHost.addTab(tabSpec);
+
 
         tabHost.setOnTabChangedListener(onTabChangeListener);
         //tabHost.getTabWidget().setBackgroundColor(Color.DKGRAY);

@@ -46,6 +46,7 @@
                 android:layout_height="match_parent"
                 android:layout_below="@android:id/tabs" >
                 
+                <include layout="@layout/start_health" />
                 <include layout="@layout/start_basic" />
                 <include layout="@layout/start_interval" />
                 <include layout="@layout/start_advanced" />
