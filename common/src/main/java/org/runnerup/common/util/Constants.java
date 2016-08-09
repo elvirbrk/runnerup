@@ -54,6 +54,58 @@ public interface Constants {
             public static final String WITH_BAROMETER = "<WithBarometer/>";
         }
 
+        public interface HEALTH_TYPE {
+            public static final String TABLE = "health_type";
+            public static final String NAME = "name";
+            public static final String DELETED = "deleted";
+            public static final String NULLCOLUMNHACK = "nullColumnHack";
+        }
+
+        public interface HEALTH_VALUE_TYPE {
+            public static final String TABLE = "health_value_type";
+            public static final String HEALTH_TYPE = "health_type_id";
+            public static final String NAME = "NAME";
+            public static final String ORDER = "order_number";
+            public static final String DELETED = "deleted";
+            public static final String NULLCOLUMNHACK = "nullColumnHack";
+        }
+
+        public interface UNITS {
+            public static final String TABLE = "units";
+            public static final String GROUP = "unit_group";
+            public static final String HEALTH_VALUE_TYPE = "health_value_type_id";
+            public static final String NAME = "name";
+            public static final String MIN_VALUE = "min_value";
+            public static final String MAX_VALUE = "max_value";
+            public static final String DEFAULT_VALUE = "default_value";
+            public static final String DECIMALS = "decimals";
+            public static final String DELETED = "deleted";
+            public static final String NULLCOLUMNHACK = "nullColumnHack";
+
+            public static final int GROUP_METRIC = 1;
+            public static final int GROUP_IMPERIAL = 2;
+            public static final int GROUP_OTHER = 2;
+        }
+
+        public interface HEALTH_ENTRY {
+            public static final String TABLE = "health_entry";
+            public static final String HEALTH_TYPE = "health_type_id";
+            public static final String TIME = "time";
+            public static final String COMMENT = "comment";
+            public static final String DELETED = "deleted";
+            public static final String NULLCOLUMNHACK = "nullColumnHack";
+        }
+
+        public interface HEALTH_VALUES {
+            public static final String TABLE = "health_values";
+            public static final String HEALTH_ENTRY = "health_entry_id";
+            public static final String HEALTH_VALUE_TYPE = "health_value_type_id";
+            public static final String UNIT = "unit";
+            public static final String VALUE = "value";
+            public static final String DELETED = "deleted";
+            public static final String NULLCOLUMNHACK = "nullColumnHack";
+        }
+
         public interface LOCATION {
             public static final String TABLE = "location";
             public static final String ACTIVITY = "activity_id";

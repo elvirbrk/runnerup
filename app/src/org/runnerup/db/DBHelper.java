@@ -68,7 +68,7 @@ import java.util.List;
 public class DBHelper extends SQLiteOpenHelper implements
         Constants {
 
-    private static final int DBVERSION = 31;
+    private static final int DBVERSION = 32;
     private static final String DBNAME = "runnerup.db";
 
     //DBVERSION update
@@ -194,6 +194,54 @@ public class DBHelper extends SQLiteOpenHelper implements
             + (" on " + DB.FEED.TABLE + " (" + DB.FEED.START_TIME
             + ")");
 
+    private static final String CREATE_TABLE_HEALTH_TYPE = "create table "
+            + DB.HEALTH_TYPE.TABLE + " ( "
+            + ("_id integer primary key autoincrement, ")
+            + (DB.HEALTH_TYPE.NAME + " text, ")
+            + ("deleted integer not null default 0, ")
+            + "nullColumnHack text null" + ");";
+
+    private static final String CREATE_TABLE_HEALTH_VALUE_TYPE = "create table "
+            + DB.HEALTH_VALUE_TYPE.TABLE + " ( "
+            + ("_id integer primary key autoincrement, ")
+            + (DB.HEALTH_VALUE_TYPE.HEALTH_TYPE + " integer,")
+            + (DB.HEALTH_VALUE_TYPE.NAME + " text, ")
+            + (DB.HEALTH_VALUE_TYPE.ORDER + " integer, ")
+            + ("deleted integer not null default 0, ")
+            + "nullColumnHack text null" + ");";
+
+    private static final String CREATE_TABLE_UNITS = "create table "
+            + DB.UNITS.TABLE + " ( "
+            + ("_id integer primary key autoincrement, ")
+            + (DB.UNITS.GROUP + " integer,")
+            + (DB.UNITS.HEALTH_VALUE_TYPE + " integer, ")
+            + (DB.UNITS.NAME + " text, ")
+            + (DB.UNITS.MIN_VALUE + " integer, ")
+            + (DB.UNITS.MAX_VALUE + " integer, ")
+            + (DB.UNITS.DEFAULT_VALUE + " integer, ")
+            + (DB.UNITS.DECIMALS + " integer, ")
+            + ("deleted integer not null default 0, ")
+            + "nullColumnHack text null" + ");";
+
+    private static final String CREATE_TABLE_HEALTH_ENTRY = "create table "
+            + DB.HEALTH_ENTRY.TABLE + " ( "
+            + ("_id integer primary key autoincrement, ")
+            + (DB.HEALTH_ENTRY.HEALTH_TYPE + " integer,")
+            + (DB.HEALTH_ENTRY.TIME + " text, ")
+            + (DB.HEALTH_ENTRY.COMMENT + " text, ")
+            + ("deleted integer not null default 0, ")
+            + "nullColumnHack text null" + ");";
+
+    private static final String CREATE_TABLE_HEALTH_VALUES = "create table "
+            + DB.HEALTH_VALUES.TABLE + " ( "
+            + ("_id integer primary key autoincrement, ")
+            + (DB.HEALTH_VALUES.HEALTH_ENTRY + " integer,")
+            + (DB.HEALTH_VALUES.HEALTH_VALUE_TYPE + " integer, ")
+            + (DB.HEALTH_VALUES.UNIT + " integer, ")
+            + (DB.HEALTH_VALUES.VALUE + " double, ")
+            + ("deleted integer not null default 0, ")
+            + "nullColumnHack text null" + ");";
+
     private static DBHelper sInstance = null;
     private Context mContext;
 
@@ -250,8 +298,19 @@ public class DBHelper extends SQLiteOpenHelper implements
         arg0.execSQL(CREATE_TABLE_AUDIO_SCHEMES);
         arg0.execSQL(CREATE_TABLE_FEED);
         arg0.execSQL(CREATE_INDEX_FEED);
+        arg0.execSQL(CREATE_TABLE_HEALTH_TYPE);
+        arg0.execSQL(CREATE_TABLE_HEALTH_VALUE_TYPE);
+        arg0.execSQL(CREATE_TABLE_UNITS);
+        arg0.execSQL(CREATE_TABLE_HEALTH_ENTRY);
+        arg0.execSQL(CREATE_TABLE_HEALTH_VALUES);
+
+        initHealth(arg0);
 
         onCreateUpgrade(arg0, 0, DBVERSION);
+    }
+
+    private void initHealth(SQLiteDatabase db) {
+        executeScript(db, "bundled/init.sql");
     }
 
 
@@ -339,6 +398,7 @@ public class DBHelper extends SQLiteOpenHelper implements
         }
 
         if (oldVersion < 31) {
+
             echoDo(arg0, "alter table " + DB.LOCATION.TABLE + " add column " + DB.LOCATION.TEMPERATURE
                     + " real");
             echoDo(arg0, "alter table " + DB.LOCATION.TABLE + " add column " + DB.LOCATION.PRESSURE
@@ -354,6 +414,16 @@ public class DBHelper extends SQLiteOpenHelper implements
             echoDo(arg0, "alter table " + DB.ACTIVITY.TABLE + " add column " + DB.ACTIVITY.META_DATA
                     + " text");
         }
+
+        if (oldVersion < 32) {
+            arg0.execSQL(CREATE_TABLE_HEALTH_TYPE);
+            arg0.execSQL(CREATE_TABLE_HEALTH_VALUE_TYPE);
+            arg0.execSQL(CREATE_TABLE_UNITS);
+            arg0.execSQL(CREATE_TABLE_HEALTH_ENTRY);
+            arg0.execSQL(CREATE_TABLE_HEALTH_VALUES);
+
+            initHealth(arg0);
+         }
 
         //DBVERSION update
         //if (oldVersion < 32) {
