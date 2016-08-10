@@ -34,7 +34,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.inputmethod.EditorInfo;
 import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.DatePicker;
 import android.widget.EditText;
 import android.widget.LinearLayout;
@@ -73,6 +72,7 @@ public class TitleSpinner extends LinearLayout {
     private final Context mContext;
     private OnSetValueListener mSetValueListener = null;
     private OnCloseDialogListener mCloseDialogListener = null;
+    private OnSelectedListener mSelectedListener = null;
     private Type mType = null;
     private boolean mFirstSetValue = true;
     private int values[] = null;
@@ -96,6 +96,10 @@ public class TitleSpinner extends LinearLayout {
 
     public interface OnCloseDialogListener {
         public void onClose(TitleSpinner spinner, boolean ok);
+    }
+
+    public interface  OnSelectedListener {
+        public void onSelected(Spinner spinner, int val);
     }
 
     public TitleSpinner(Context context, AttributeSet attrs) {
@@ -227,7 +231,7 @@ public class TitleSpinner extends LinearLayout {
             }
         });
 
-        mSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
                 if (mType == Type.TS_SPINNER_TXT) {
@@ -241,6 +245,14 @@ public class TitleSpinner extends LinearLayout {
                     onClose(true);
                 }
                 mFirstSetValue = false;
+
+                if (mSelectedListener != null) {
+                    try {
+                        mSelectedListener.onSelected(mSpinner, arg2);
+                    } catch (java.lang.IllegalArgumentException ex) {
+                        return;
+                    }
+                }
             }
 
             @Override
@@ -504,6 +516,10 @@ public class TitleSpinner extends LinearLayout {
             mCloseDialogListener.onClose(this, b);
     }
 
+    public void setOnSelectedListener(OnSelectedListener listener) {
+        this.mSelectedListener = listener;
+    }
+
     public void setTitle(String title) {
         mTitle.setText(title);
     }
@@ -637,6 +653,7 @@ public class TitleSpinner extends LinearLayout {
         Editor pref = PreferenceManager.getDefaultSharedPreferences(mContext).edit();
         pref.putInt(mKey, value);
         pref.commit();
+
     }
 
     public void addDisabledValue(int value) {
