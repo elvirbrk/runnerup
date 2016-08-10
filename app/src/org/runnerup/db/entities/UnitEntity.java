@@ -22,11 +22,13 @@
 package org.runnerup.db.entities;
 
         import android.annotation.TargetApi;
+        import android.content.Context;
         import android.database.Cursor;
         import android.os.Build;
         import android.util.Log;
 
         import org.runnerup.common.util.Constants;
+        import org.runnerup.db.DBHelper;
 
         import java.util.ArrayList;
         import java.util.List;
@@ -35,13 +37,13 @@ package org.runnerup.db.entities;
  * Content values wrapper for the {@code location} table.
  */
 @TargetApi(Build.VERSION_CODES.FROYO)
-public class HealthDataValueUnitEntity extends AbstractEntity {
+public class UnitEntity extends AbstractEntity {
 
-    public HealthDataValueUnitEntity() {
+    public UnitEntity() {
         super();
     }
 
-    public HealthDataValueUnitEntity(Cursor c) {
+    public UnitEntity(Cursor c) {
         super();
         try {
             toContentValues(c);
@@ -52,34 +54,34 @@ public class HealthDataValueUnitEntity extends AbstractEntity {
 
 
     public void setGroup(Integer value) {
-        values().put(Constants.DB.HEALTH_DATA_VALUE_UNITS.GROUP, value);
+        values().put(Constants.DB.UNITS.GROUP, value);
     }
 
     public Integer getGroup() {
-        if (values().containsKey(Constants.DB.HEALTH_DATA_VALUE_UNITS.GROUP)) {
-            return values().getAsInteger(Constants.DB.HEALTH_DATA_VALUE_UNITS.GROUP);
+        if (values().containsKey(Constants.DB.UNITS.GROUP)) {
+            return values().getAsInteger(Constants.DB.UNITS.GROUP);
         }
         return null;
     }
 
-    public void setHealtDataType(Long value) {
-        values().put(Constants.DB.HEALTH_DATA_VALUE_UNITS.HEALTH_DATA_TYPE, value);
+    public void setHealtDataType(Integer value) {
+        values().put(Constants.DB.UNITS.HEALTH_VALUE_TYPE, value);
     }
 
-    public Long getHealtDataType() {
-        if (values().containsKey(Constants.DB.HEALTH_DATA_VALUE_UNITS.HEALTH_DATA_TYPE)) {
-            return values().getAsLong(Constants.DB.HEALTH_DATA_VALUE_UNITS.HEALTH_DATA_TYPE);
+    public Integer getHealtDataType() {
+        if (values().containsKey(Constants.DB.UNITS.HEALTH_VALUE_TYPE)) {
+            return values().getAsInteger(Constants.DB.UNITS.HEALTH_VALUE_TYPE);
         }
         return null;
     }
 
-    public void setName(Double value) {
-        values().put(Constants.DB.HEALTH_DATA_VALUE_UNITS.NAME, value);
+    public void setName(String value) {
+        values().put(Constants.DB.UNITS.NAME, value);
     }
 
-    public Double getName() {
-        if (values().containsKey(Constants.DB.HEALTH_DATA_VALUE_UNITS.NAME)) {
-            return values().getAsDouble(Constants.DB.HEALTH_DATA_VALUE_UNITS.NAME);
+    public String getName() {
+        if (values().containsKey(Constants.DB.UNITS.NAME)) {
+            return values().getAsString(Constants.DB.UNITS.NAME);
         }
         return null;
     }
@@ -90,20 +92,34 @@ public class HealthDataValueUnitEntity extends AbstractEntity {
     protected List<String> getValidColumns() {
         List<String> columns = new ArrayList<String>();
         columns.add(Constants.DB.PRIMARY_KEY);
-        columns.add(Constants.DB.HEALTH_DATA_VALUE_UNITS.GROUP);
-        columns.add(Constants.DB.HEALTH_DATA_VALUE_UNITS.HEALTH_DATA_TYPE);
-        columns.add(Constants.DB.HEALTH_DATA_VALUE_UNITS.NAME);
-        columns.add(Constants.DB.HEALTH_DATA_VALUE_UNITS.COMMENT);
+        columns.add(Constants.DB.UNITS.GROUP);
+        columns.add(Constants.DB.UNITS.HEALTH_VALUE_TYPE);
+        columns.add(Constants.DB.UNITS.NAME);
         return columns;
     }
 
     @Override
     protected String getTableName() {
-        return Constants.DB.HEALTH_DATA_VALUE_UNITS.TABLE;
+        return Constants.DB.UNITS.TABLE;
     }
 
     @Override
     protected String getNullColumnHack() {
         return null;
+    }
+
+    public static String[] getAllUnits(Context ctx) {
+        return DBHelper.getAllColumnValues(DBHelper.getReadableDatabase(ctx), Constants.DB.UNITS.TABLE,
+                Constants.DB.UNITS.NAME, "");
+    }
+
+    public static String[] getAllUnits(Context ctx, String healthValueType) {
+        if (healthValueType != null) {
+            return DBHelper.getAllColumnValues(DBHelper.getReadableDatabase(ctx), Constants.DB.UNITS.TABLE,
+                    Constants.DB.UNITS.NAME, "WHERE " + Constants.DB.UNITS.HEALTH_VALUE_TYPE + " = " + healthValueType);
+        }
+        else {
+            return getAllUnits(ctx);
+        }
     }
 }

@@ -25,11 +25,13 @@
     package org.runnerup.db.entities;
 
     import android.annotation.TargetApi;
+    import android.content.Context;
     import android.database.Cursor;
     import android.os.Build;
     import android.util.Log;
 
     import org.runnerup.common.util.Constants;
+    import org.runnerup.db.DBHelper;
 
     import java.util.ArrayList;
     import java.util.List;
@@ -38,13 +40,13 @@
      * Content values wrapper for the {@code location} table.
      */
     @TargetApi(Build.VERSION_CODES.FROYO)
-    public class HealthDataValueEntity extends AbstractEntity {
+    public class HealthValueEntity extends AbstractEntity {
 
-        public HealthDataValueEntity() {
+        public HealthValueEntity() {
             super();
         }
 
-        public HealthDataValueEntity(Cursor c) {
+        public HealthValueEntity(Cursor c) {
             super();
             try {
                 toContentValues(c);
@@ -54,46 +56,46 @@
         }
 
 
-        public void setHealthData(Long value) {
-            values().put(Constants.DB.HEALTH_DATA_VALUES.HEALTH_DATA, value);
+        public void setHealthEntryId(Long value) {
+            values().put(Constants.DB.HEALTH_VALUES.HEALTH_ENTRY, value);
         }
 
-        public Long getHealthData() {
-            if (values().containsKey(Constants.DB.HEALTH_DATA_VALUES.HEALTH_DATA)) {
-                return values().getAsLong(Constants.DB.HEALTH_DATA_VALUES.HEALTH_DATA);
+        public Long getHealthEntryId() {
+            if (values().containsKey(Constants.DB.HEALTH_VALUES.HEALTH_ENTRY)) {
+                return values().getAsLong(Constants.DB.HEALTH_VALUES.HEALTH_ENTRY);
             }
             return null;
         }
 
         public void setType(Long value) {
-            values().put(Constants.DB.HEALTH_DATA_VALUES.TYPE, value);
+            values().put(Constants.DB.HEALTH_VALUES.HEALTH_VALUE_TYPE, value);
         }
 
         public Long getType() {
-            if (values().containsKey(Constants.DB.HEALTH_DATA_VALUES.TYPE)) {
-                return values().getAsLong(Constants.DB.HEALTH_DATA_VALUES.TYPE);
+            if (values().containsKey(Constants.DB.HEALTH_VALUES.HEALTH_VALUE_TYPE)) {
+                return values().getAsLong(Constants.DB.HEALTH_VALUES.HEALTH_VALUE_TYPE);
             }
             return null;
         }
 
         public void setValue(Double value) {
-            values().put(Constants.DB.HEALTH_DATA_VALUES.VALUE, value);
+            values().put(Constants.DB.HEALTH_VALUES.VALUE, value);
         }
 
         public Double getValue() {
-            if (values().containsKey(Constants.DB.HEALTH_DATA_VALUES.VALUE)) {
-                return values().getAsDouble(Constants.DB.HEALTH_DATA_VALUES.VALUE);
+            if (values().containsKey(Constants.DB.HEALTH_VALUES.VALUE)) {
+                return values().getAsDouble(Constants.DB.HEALTH_VALUES.VALUE);
             }
             return null;
         }
 
-        public void setUnit(Double value) {
-            values().put(Constants.DB.HEALTH_DATA_VALUES.UNIT, value);
+        public void setUnit(Long value) {
+            values().put(Constants.DB.HEALTH_VALUES.UNIT, value);
         }
 
-        public Double getUnit() {
-            if (values().containsKey(Constants.DB.HEALTH_DATA_VALUES.UNIT)) {
-                return values().getAsDouble(Constants.DB.HEALTH_DATA_VALUES.UNIT);
+        public Long getUnit() {
+            if (values().containsKey(Constants.DB.HEALTH_VALUES.UNIT)) {
+                return values().getAsLong(Constants.DB.HEALTH_VALUES.UNIT);
             }
             return null;
         }
@@ -104,21 +106,22 @@
         protected List<String> getValidColumns() {
             List<String> columns = new ArrayList<String>();
             columns.add(Constants.DB.PRIMARY_KEY);
-            columns.add(Constants.DB.HEALTH_DATA_VALUES.HEALTH_DATA);
-            columns.add(Constants.DB.HEALTH_DATA_VALUES.TYPE);
-            columns.add(Constants.DB.HEALTH_DATA_VALUES.VALUE);
-            columns.add(Constants.DB.HEALTH_DATA_VALUES.UNIT);
-            columns.add(Constants.DB.HEALTH_DATA_VALUES.COMMENT);
+            columns.add(Constants.DB.HEALTH_VALUES.HEALTH_ENTRY);
+            columns.add(Constants.DB.HEALTH_VALUES.HEALTH_VALUE_TYPE);
+            columns.add(Constants.DB.HEALTH_VALUES.VALUE);
+            columns.add(Constants.DB.HEALTH_VALUES.UNIT);
             return columns;
         }
 
         @Override
         protected String getTableName() {
-            return Constants.DB.HEALTH_DATA_VALUES.TABLE;
+            return Constants.DB.HEALTH_VALUES.TABLE;
         }
 
         @Override
         protected String getNullColumnHack() {
             return null;
         }
+
+
     }
