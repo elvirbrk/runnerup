@@ -56,8 +56,11 @@ import org.runnerup.export.SyncManager;
 import org.runnerup.export.Synchronizer;
 import org.runnerup.util.FileUtil;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -192,6 +195,7 @@ public class DBHelper extends SQLiteOpenHelper implements
             + ")");
 
     private static DBHelper sInstance = null;
+    private Context mContext;
 
     private static synchronized DBHelper getHelper(Context context) {
         if (sInstance == null) {
@@ -231,6 +235,7 @@ public class DBHelper extends SQLiteOpenHelper implements
 
     private DBHelper(Context context, int a) {
         super(context, DBNAME, null, DBVERSION);
+        mContext = context;
     }
 
     @Override
@@ -247,6 +252,23 @@ public class DBHelper extends SQLiteOpenHelper implements
         arg0.execSQL(CREATE_INDEX_FEED);
 
         onCreateUpgrade(arg0, 0, DBVERSION);
+    }
+
+
+    private void executeScript(SQLiteDatabase db, String file) {
+        try {
+            InputStream is = this.mContext.getAssets().open(file);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                Log.i("SQL Script", line);
+                if (!line.isEmpty() && !line.trim().startsWith("--"))
+                    db.execSQL(line);
+            }
+        } catch (IOException e) {
+            Log.e("SQL Script", e.getMessage());
+        }
+        Log.i("SQL Script", "script executed");
     }
 
     @Override
@@ -606,6 +628,28 @@ public class DBHelper extends SQLiteOpenHelper implements
             }
         }
         return result;
+    }
+
+    public static List<String> getAllColumnValues(SQLiteDatabase db, String table, String column, String filter) {
+        String query = "SELECT  " + column + " FROM " + table +"  "+ filter + ";";
+        Cursor cursor = db.rawQuery(query, null);
+
+        List<String> buf = new ArrayList<String>();
+
+
+
+        if( cursor != null && cursor.getCount() > 0){
+            cursor.moveToFirst();
+            do {
+
+                buf.add(cursor.getString(0));
+
+            } while (cursor.moveToNext());
+
+        }
+
+        return buf;
+
     }
 
     public static String getDbPath(Context ctx) {
