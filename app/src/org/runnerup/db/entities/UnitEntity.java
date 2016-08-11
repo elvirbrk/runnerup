@@ -24,6 +24,7 @@ package org.runnerup.db.entities;
         import android.annotation.TargetApi;
         import android.content.Context;
         import android.database.Cursor;
+        import android.database.sqlite.SQLiteDatabase;
         import android.os.Build;
         import android.util.Log;
 
@@ -37,7 +38,7 @@ package org.runnerup.db.entities;
  * Content values wrapper for the {@code location} table.
  */
 @TargetApi(Build.VERSION_CODES.FROYO)
-public class UnitEntity extends AbstractEntity {
+public class UnitEntity extends AbstractTypeEntity {
 
     public UnitEntity() {
         super();
@@ -64,11 +65,11 @@ public class UnitEntity extends AbstractEntity {
         return null;
     }
 
-    public void setHealtDataType(Integer value) {
+    public void setHealthValueType(Integer value) {
         values().put(Constants.DB.UNITS.HEALTH_VALUE_TYPE, value);
     }
 
-    public Integer getHealtDataType() {
+    public Integer getHealtValueType() {
         if (values().containsKey(Constants.DB.UNITS.HEALTH_VALUE_TYPE)) {
             return values().getAsInteger(Constants.DB.UNITS.HEALTH_VALUE_TYPE);
         }
@@ -108,18 +109,18 @@ public class UnitEntity extends AbstractEntity {
         return null;
     }
 
-    public static String[] getAllUnits(Context ctx) {
-        return DBHelper.getAllColumnValues(DBHelper.getReadableDatabase(ctx), Constants.DB.UNITS.TABLE,
-                Constants.DB.UNITS.NAME, "");
+    public static List<UnitEntity> getAll(SQLiteDatabase db, int healthValueTypeId){
+        List<UnitEntity> list = new ArrayList<UnitEntity>();
+        for (AbstractTypeEntity a : getAll(db, new UnitEntity())) {
+            if (((UnitEntity)a).getHealtValueType() == healthValueTypeId)
+            {
+                list.add((UnitEntity)a);
+            }
+
+        }
+
+        return list;
     }
 
-    public static String[] getAllUnits(Context ctx, String healthValueType) {
-        if (healthValueType != null) {
-            return DBHelper.getAllColumnValues(DBHelper.getReadableDatabase(ctx), Constants.DB.UNITS.TABLE,
-                    Constants.DB.UNITS.NAME, "WHERE " + Constants.DB.UNITS.HEALTH_VALUE_TYPE + " = " + healthValueType);
-        }
-        else {
-            return getAllUnits(ctx);
-        }
-    }
+
 }

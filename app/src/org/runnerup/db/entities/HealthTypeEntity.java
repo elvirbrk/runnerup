@@ -28,13 +28,12 @@
     package org.runnerup.db.entities;
 
     import android.annotation.TargetApi;
-    import android.content.Context;
     import android.database.Cursor;
+    import android.database.sqlite.SQLiteDatabase;
     import android.os.Build;
     import android.util.Log;
 
     import org.runnerup.common.util.Constants;
-    import org.runnerup.db.DBHelper;
 
     import java.util.ArrayList;
     import java.util.List;
@@ -43,7 +42,7 @@
      * Content values wrapper for the {@code location} table.
      */
     @TargetApi(Build.VERSION_CODES.FROYO)
-    public class HealthTypeEntity extends AbstractEntity {
+    public class HealthTypeEntity extends AbstractTypeEntity {
 
 
         public HealthTypeEntity() {
@@ -87,14 +86,16 @@
             return Constants.DB.HEALTH_TYPE.TABLE;
         }
 
+        public static List<AbstractTypeEntity> getAll(SQLiteDatabase db){
+            return AbstractTypeEntity.getAll(db, new HealthTypeEntity());
+        };
+
         @Override
         protected String getNullColumnHack() {
             return null;
         }
 
-        public static String[] getAllTypes(Context ctx) {
-            return DBHelper.getAllColumnValues(DBHelper.getReadableDatabase(ctx), Constants.DB.HEALTH_TYPE.TABLE, Constants.DB.HEALTH_TYPE.NAME, "");
-        }
+
 
      }
 

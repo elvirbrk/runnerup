@@ -27,6 +27,7 @@
 import android.annotation.TargetApi;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.util.Log;
 
@@ -40,7 +41,7 @@ import java.util.List;
  * Content values wrapper for the {@code location} table.
  */
 @TargetApi(Build.VERSION_CODES.FROYO)
-public class HealthValueTypeEntity extends AbstractEntity {
+public class HealthValueTypeEntity extends AbstractTypeEntity {
 
     public HealthValueTypeEntity() {
         super();
@@ -111,18 +112,16 @@ public class HealthValueTypeEntity extends AbstractEntity {
         return null;
     }
 
-    public static String[] getAllTypes(Context ctx) {
-        return DBHelper.getAllColumnValues(DBHelper.getReadableDatabase(ctx), Constants.DB.HEALTH_VALUE_TYPE.TABLE,
-                Constants.DB.HEALTH_VALUE_TYPE.NAME, "");
-    }
+    public static List<HealthValueTypeEntity> getAll(SQLiteDatabase db, int healthTypeId){
+        List<HealthValueTypeEntity> list = new ArrayList<HealthValueTypeEntity>();
+        for (AbstractTypeEntity a : getAll(db, new HealthValueTypeEntity())) {
+            if (((HealthValueTypeEntity)a).getHealthType() == healthTypeId)
+            {
+                list.add((HealthValueTypeEntity)a);
+            }
 
-    public static String[] getAllTypes(Context ctx, String healthType) {
-        if (healthType != null) {
-            return DBHelper.getAllColumnValues(DBHelper.getReadableDatabase(ctx), Constants.DB.HEALTH_VALUE_TYPE.TABLE,
-                    Constants.DB.HEALTH_VALUE_TYPE.NAME, "WHERE " + Constants.DB.HEALTH_VALUE_TYPE.HEALTH_TYPE + " = " + healthType);
         }
-        else {
-            return getAllTypes(ctx);
-        }
+
+        return list;
     }
 }

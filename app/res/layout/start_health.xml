@@ -23,31 +23,30 @@
     android:orientation="vertical">
 
     <org.runnerup.widget.TitleSpinner
-        android:id="@+id/manual_health"
+        android:id="@+id/health_type"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
-        android:entries="@array/healthDataTypes"
         android:prompt="@string/Type"
-        android:text="@string/Health" />
+        android:text="@string/Health_Type"
+        runnerup:type="spinner_txt_id" />
 
     <org.runnerup.widget.TitleSpinner
-        android:id="@+id/manual_health_value"
+        android:id="@+id/health_value_type"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/manual_health"
+        android:layout_below="@+id/health_type"
         android:layout_alignParentLeft="true"
-        android:layout_alignParentTop="true"
-        android:entries="@array/healthDataValues"
         android:prompt="@string/Type"
-        android:text="@string/Value" />
+        android:text="@string/Health_Value"
+        runnerup:type="spinner_txt_id" />
 
     <org.runnerup.widget.TitleSpinner
         android:id="@+id/health_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/manual_health_value"
+        android:layout_below="@+id/health_value_type"
         android:prompt="@string/Type"
         android:defaultValue="today"
         android:text="@string/Date"
@@ -58,20 +57,30 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/manual_date"
+        android:layout_below="@+id/health_date"
         android:prompt="@string/Type"
         android:text="@string/Start_hour"
         runnerup:type="timepicker" />
+
+    <org.runnerup.widget.TitleSpinner
+        android:id="@+id/health_unit"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/health_time"
+        android:layout_alignParentLeft="true"
+        android:prompt="@string/Type"
+        android:text="@string/Health_Value"
+        runnerup:type="spinner_txt_id" />
 
        <org.runnerup.widget.TitleSpinner
         android:id="@+id/health_value"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/manual_time"
+        android:layout_below="@+id/health_unit"
         android:prompt="@string/Type"
         android:inputType="numberDecimal"
-        android:text="@string/Value"
+        android:text="@string/Health_Value"
         runnerup:type="numberpicker" />
 
 
@@ -80,7 +89,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
-        android:layout_below="@+id/manual_pace"
+        android:layout_below="@+id/health_value"
         android:layout_alignParentBottom="true"
         android:ems="10"
         android:gravity="top|left"

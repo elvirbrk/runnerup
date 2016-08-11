@@ -248,7 +248,8 @@
   <string name="Advanced">Advanced</string>
   <string name="Manual">Manual</string>
   <string name="Health">Health</string>
-  <string name="Value">Value</string>
+  <string name="Health_Type">Health Type</string>
+  <string name="Health_Value">Health Value Type</string>
   <string name="Add_workout_notes">Add workout notes</string>
   <string name="Pruning_deleted_activities_from_database">Pruning deleted activities from database</string>
   <string name="Prune">Prune</string>

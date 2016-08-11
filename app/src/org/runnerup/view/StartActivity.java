@@ -64,6 +64,10 @@ import org.runnerup.common.tracker.TrackerState;
 import org.runnerup.common.util.Constants;
 import org.runnerup.common.util.Constants.DB;
 import org.runnerup.db.DBHelper;
+import org.runnerup.db.entities.AbstractEntity;
+import org.runnerup.db.entities.AbstractTypeEntity;
+import org.runnerup.db.entities.HealthTypeEntity;
+import org.runnerup.db.entities.HealthValueTypeEntity;
 import org.runnerup.hr.MockHRProvider;
 import org.runnerup.notification.GpsBoundState;
 import org.runnerup.notification.GpsSearchingState;
@@ -76,6 +80,7 @@ import org.runnerup.tracker.component.TrackerWear;
 import org.runnerup.util.Formatter;
 import org.runnerup.util.SafeParse;
 import org.runnerup.util.TickListener;
+import org.runnerup.widget.NameIdAdapter;
 import org.runnerup.widget.TitleSpinner;
 import org.runnerup.widget.TitleSpinner.OnCloseDialogListener;
 import org.runnerup.widget.TitleSpinner.OnSetValueListener;
@@ -162,11 +167,10 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
     TitleSpinner manualPace = null;
     EditText manualNotes = null;
 
-    TitleSpinner healthData = null;
-    TitleSpinner healthDataType = null;
-    TitleSpinner healthDataValue = null;
-    TitleSpinner healthDataDate = null;
-    TitleSpinner healthDataTime = null;
+    TitleSpinner healthType = null;
+    TitleSpinner healthValueType = null;
+    TitleSpinner healthDate = null;
+    TitleSpinner healthTime = null;
 
     SQLiteDatabase mDB = null;
 
@@ -317,14 +321,13 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         manualPace.setVisibility(View.GONE);
         manualNotes = (EditText) findViewById(R.id.manual_notes);
 
-        healthData = (TitleSpinner) findViewById(R.id.manual_health);
-        healthDataType = (TitleSpinner) findViewById(R.id.manual_health_value);
-        healthDataValue = (TitleSpinner) findViewById(R.id.health_value);
-        healthDataDate = (TitleSpinner) findViewById(R.id.health_date);
-        healthDataTime = (TitleSpinner) findViewById(R.id.health_time);
+        healthType = (TitleSpinner) findViewById(R.id.health_type);
+        healthValueType = (TitleSpinner) findViewById(R.id.health_value_type);
+        healthDate = (TitleSpinner) findViewById(R.id.health_date);
+        healthTime = (TitleSpinner) findViewById(R.id.health_time);
 
-        healthData.setOnSelectedListener(onSetHealthData);
-        healthDataType.setOnSelectedListener(onSetHealthDataType);
+        healthType.setOnSelectedListener(onSetHealthType);
+        healthValueType.setOnSelectedListener(onSetHealthValueType);
 
         if (getParent() != null && getParent().getIntent() != null) {
             Intent i = getParent().getIntent();
@@ -337,7 +340,10 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         }
 
         updateTargetView();
+        
+        loadHealthTypes();
     }
+
 
     @Override
     public void onStart() {
@@ -1158,40 +1164,24 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         }
     };
 
-    final OnSelectedListener onSetHealthData = new OnSelectedListener() {
+    final OnSelectedListener onSetHealthType = new OnSelectedListener() {
 
         @Override
         public void onSelected(Spinner spiner, int newValue) throws IllegalArgumentException {
-            int pos = healthData.getValueInt();
+            int pos = healthType.getValueId();
 
-/* TODO
-            // database handler
-            SQLiteDatabase db = DBHelper.getReadableDatabase(getApplicationContext());
-
-            // Spinner Drop down elements
-            List<String> lables = new LinkedList<>();
-
-            // Creating adapter for spinner
-            ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this);
-
-            // Drop down layout style - list view with radio button
-            dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-            // attaching data adapter to spinner
-            healthDataType.setAdapter(dataAdapter);
-
-            */
+        //loadHealthValueTypes(pos));
 
         }
 
     };
 
-    final OnSelectedListener onSetHealthDataType = new OnSelectedListener() {
+    final OnSelectedListener onSetHealthValueType = new OnSelectedListener() {
 
         @Override
         public void onSelected(Spinner spiner, int newValue) throws IllegalArgumentException {
 
-            int pos = healthData.getValueInt();
+            int pos = healthValueType.getValueInt();
 
 /* TODO
             // database handler
@@ -1213,5 +1203,31 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         }
 
     };
+
+    private void loadHealthTypes() {
+        List<AbstractTypeEntity> types = HealthTypeEntity.getAll(mDB);
+
+        // Creating adapter for spinner
+        NameIdAdapter dataAdapter = new NameIdAdapter(this,android.R.layout.simple_spinner_item, types.toArray(new AbstractTypeEntity[types.size()]));
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        healthType.setAdapter(dataAdapter);
+    }
+
+    private void loadHealthValueTypes(int healthTypeId) {
+        List<HealthValueTypeEntity> types = HealthValueTypeEntity.getAll(mDB, healthTypeId);
+
+        // Creating adapter for spinner
+        NameIdAdapter dataAdapter = new NameIdAdapter(this,android.R.layout.simple_spinner_item, types.toArray(new AbstractTypeEntity[types.size()]));
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        healthValueType.setAdapter(dataAdapter);
+    }
 
 }

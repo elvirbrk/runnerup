@@ -305,7 +305,7 @@ public class TitleSpinner extends LinearLayout {
                     if (mSpinner.getAdapter() != null) {
                         AbstractTypeEntity type = (AbstractTypeEntity)mSpinner.getAdapter().getItem(arg2);
                         setValue(type.getName());
-                        setValueId((type.getId()));
+                        setValueId((type.getId()).intValue());
                     }
                 }
 
@@ -854,6 +854,9 @@ public class TitleSpinner extends LinearLayout {
 
     public int getValueInt() {
         return (int)mCurrValue;
+    }
+    public int getValueId() {
+        return mValueId;
     }
 
     public Long getValueId() {
