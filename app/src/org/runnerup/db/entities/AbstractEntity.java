@@ -28,6 +28,8 @@ import android.os.Build;
 
 import org.runnerup.common.util.Constants;
 
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,9 +38,9 @@ public abstract class AbstractEntity implements DBEntity {
 
     private final ContentValues mContentValues;
 
-    protected abstract List<String> getValidColumns();
+    protected abstract  List<String> getValidColumns();
 
-    protected abstract String getTableName();
+    protected abstract  String getTableName();
 
     protected abstract String getNullColumnHack();
 
@@ -139,4 +141,49 @@ public abstract class AbstractEntity implements DBEntity {
             cursor.close();
         }
     }
+
+    public static List<AbstractEntity> getAll(SQLiteDatabase db, AbstractEntity inst) {
+        return getAll(db, inst, "1", "1");
+    }
+
+
+    public static List<AbstractEntity> getAll(SQLiteDatabase db, AbstractEntity inst, String column,String value) {
+
+        return getAll(db, inst, column, value, "1","0", "2");
+    }
+
+    public static List<AbstractEntity> getAll(SQLiteDatabase db, AbstractEntity inst, String filterColumn,String filterValue,
+                                              String timeColumn, String startTime, String endTime) {
+
+        String cols[] = new String[inst.getValidColumns().size()];
+        inst.getValidColumns().toArray(cols);
+        Cursor cursor = db.query(inst.getTableName(), cols, filterColumn+" = "+ filterValue + " and "+ timeColumn + " between "+ startTime+ " and "+ endTime , null, null, null, null);
+
+        List<AbstractEntity> list = new ArrayList<AbstractEntity>();
+        try {
+            if( cursor != null && cursor.getCount() > 0){
+                cursor.moveToFirst();
+                do {
+                    AbstractEntity ae = inst.getClass().getDeclaredConstructor(Cursor.class).newInstance(cursor);
+                    ae.db = db;
+
+                    list.add(ae);
+
+                } while (cursor.moveToNext());
+
+            }
+        } catch (InstantiationException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+        } catch (InvocationTargetException e) {
+            e.printStackTrace();
+        } finally {
+            cursor.close();
+        }
+        return list;
+    }
+
 }

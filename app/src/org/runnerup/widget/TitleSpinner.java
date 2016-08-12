@@ -43,6 +43,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 
 import org.runnerup.R;
+import org.runnerup.db.entities.AbstractTypeEntity;
 import org.runnerup.util.SafeParse;
 
 import java.text.DateFormat;
@@ -61,9 +62,11 @@ public class TitleSpinner extends LinearLayout {
         TS_TIMEPICKER,
         TS_DURATIONPICKER,
         TS_DISTANCEPICKER,
-        TS_NUMBERPICKER
+        TS_NUMBERPICKER,
+        TS_SPINNER_TXT_ID
     }
 
+    private int mValueId = -1;
     private String mKey = null;
     private TextView mTitle = null;
     private TextView mValue = null;
@@ -148,7 +151,10 @@ public class TitleSpinner extends LinearLayout {
         } else if ("numberpicker".contentEquals(type)) {
             mType = Type.TS_NUMBERPICKER;
             setupNumberPicker(context, attrs, arr, defaultValue);
-        } else {
+        } else if ("spinner_txt_id".contentEquals(type)) {
+            mType = Type.TS_SPINNER_TXT_ID;
+            setupIdSpinner(context, attrs, arr, defaultValue);
+        }else {
             arr = null; // force null pointer exception
         }
 
@@ -261,6 +267,67 @@ public class TitleSpinner extends LinearLayout {
         });
     }
 
+    private void setupIdSpinner(Context context, AttributeSet attrs, TypedArray arr, CharSequence defaultValue) {
+
+
+        int entriesId = arr.getResourceId(R.styleable.TitleSpinner_android_entries, 0);
+        int valuesId = arr.getResourceId(R.styleable.TitleSpinner_values, 0);
+        if (valuesId != 0) {
+            values = getResources().getIntArray(valuesId);
+        }
+        if (entriesId != 0) {
+            DisabledEntriesAdapter adapter = new DisabledEntriesAdapter(mContext, entriesId);
+            mSpinner.setAdapter(adapter);
+            int value = 0;
+            if (defaultValue != null) {
+                value = SafeParse.parseInt(defaultValue.toString(), 0);
+            }
+            setValue(value);
+//            if (value >= 0 && value < entries.length) {
+//                mValueInt = value;
+//                mValue.setText(entries[value]);
+//            }
+        }
+
+        LinearLayout layout = (LinearLayout) findViewById(R.id.title_spinner);
+        layout.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mSpinner.performClick();
+            }
+        });
+
+        mSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+                if (mType == Type.TS_SPINNER_TXT_ID) {
+                    if (mSpinner.getAdapter() != null) {
+                        AbstractTypeEntity type = (AbstractTypeEntity)mSpinner.getAdapter().getItem(arg2);
+                        setValue(type.getName());
+                        setValueId((type.getId()).intValue());
+                    }
+                }
+
+                if (!mFirstSetValue) {
+                    onClose(true);
+                }
+                mFirstSetValue = false;
+
+                if (mSelectedListener != null) {
+                    try {
+                        mSelectedListener.onSelected(mSpinner, arg2);
+                    } catch (java.lang.IllegalArgumentException ex) {
+                        return;
+                    }
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> arg0) {
+            }
+        });
+    }
+
     private static LinearLayout createLayout(Context context) {
         final LinearLayout layout = new LinearLayout(context);
         layout.setOrientation(LinearLayout.HORIZONTAL);
@@ -293,6 +360,10 @@ public class TitleSpinner extends LinearLayout {
                 alert.setPositiveButton(getResources().getString(R.string.OK), new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int whichButton) {
                         setValue(getValue(datePicker));
+                        Calendar c = Calendar.getInstance();
+                        c.set(datePicker.getYear() , datePicker.getMonth(), datePicker.getDayOfMonth());
+                        setValueDate(c.getTime());
+
                         dialog.dismiss();
                         layout.removeView(datePicker);
                         onClose(true);
@@ -543,6 +614,7 @@ public class TitleSpinner extends LinearLayout {
             case TS_NUMBERPICKER:
             case TS_DATEPICKER:
             case TS_TIMEPICKER:
+            case TS_SPINNER_TXT_ID:
                 final String val = pref.getString(mKey, defaultValue == null ? "" : defaultValue);
                 setValue(val);
                 break;
@@ -644,7 +716,10 @@ public class TitleSpinner extends LinearLayout {
         if (mSpinner.getAdapter() != null) {
             Object val = mSpinner.getAdapter().getItem(selectionValue);
             if (val != null)
-                mValue.setText(val.toString());
+                if (val instanceof AbstractTypeEntity)
+                    mValue.setText(((AbstractTypeEntity)val).getName());
+                else
+                    mValue.setText(val.toString());
             else
                 mValue.setText("");
         }
@@ -655,6 +730,10 @@ public class TitleSpinner extends LinearLayout {
         pref.commit();
 
     }
+    public void setValueId(int value) {
+        mValueId = value;
+    }
+
 
     public void addDisabledValue(int value) {
         int selection = getSelectionValue(value);
@@ -691,6 +770,9 @@ public class TitleSpinner extends LinearLayout {
 
     public int getValueInt() {
         return (int)mCurrValue;
+    }
+    public int getValueId() {
+        return mValueId;
     }
 
     public void clear() {
