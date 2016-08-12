@@ -68,6 +68,7 @@ import org.runnerup.db.entities.AbstractEntity;
 import org.runnerup.db.entities.AbstractTypeEntity;
 import org.runnerup.db.entities.HealthTypeEntity;
 import org.runnerup.db.entities.HealthValueTypeEntity;
+import org.runnerup.db.entities.UnitEntity;
 import org.runnerup.hr.MockHRProvider;
 import org.runnerup.notification.GpsBoundState;
 import org.runnerup.notification.GpsSearchingState;
@@ -169,6 +170,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
     TitleSpinner healthType = null;
     TitleSpinner healthValueType = null;
+    TitleSpinner healthUnit = null;
     TitleSpinner healthDate = null;
     TitleSpinner healthTime = null;
 
@@ -323,6 +325,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
         healthType = (TitleSpinner) findViewById(R.id.health_type);
         healthValueType = (TitleSpinner) findViewById(R.id.health_value_type);
+        healthUnit = (TitleSpinner) findViewById(R.id.health_unit);
         healthDate = (TitleSpinner) findViewById(R.id.health_date);
         healthTime = (TitleSpinner) findViewById(R.id.health_time);
 
@@ -1170,7 +1173,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         public void onSelected(Spinner spiner, int newValue) throws IllegalArgumentException {
             int pos = healthType.getValueId();
 
-        //loadHealthValueTypes(pos));
+        loadHealthValueTypes(pos);
 
         }
 
@@ -1181,9 +1184,11 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         @Override
         public void onSelected(Spinner spiner, int newValue) throws IllegalArgumentException {
 
-            int pos = healthValueType.getValueInt();
+            int pos = healthValueType.getValueId();
 
-/* TODO
+            loadHealthUnits(pos);
+
+/* TODO Dynamic layout
             // database handler
             SQLiteDatabase db = DBHelper.getReadableDatabase(getApplicationContext());
 
@@ -1228,6 +1233,19 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
         // attaching data adapter to spinner
         healthValueType.setAdapter(dataAdapter);
+    }
+
+    private void loadHealthUnits(int healthValueTypeId) {
+        List<UnitEntity> types = UnitEntity.getAll(mDB, healthValueTypeId);
+
+        // Creating adapter for spinner
+        NameIdAdapter dataAdapter = new NameIdAdapter(this,android.R.layout.simple_spinner_item, types.toArray(new AbstractTypeEntity[types.size()]));
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        healthUnit.setAdapter(dataAdapter);
     }
 
 }
