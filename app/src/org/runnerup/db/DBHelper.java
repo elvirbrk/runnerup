@@ -700,27 +700,6 @@ public class DBHelper extends SQLiteOpenHelper implements
         return result;
     }
 
-    public static List<String> getAllColumnValues(SQLiteDatabase db, String table, String column, String filter) {
-        String query = "SELECT  " + column + " FROM " + table +"  "+ filter + ";";
-        Cursor cursor = db.rawQuery(query, null);
-
-        List<String> buf = new ArrayList<String>();
-
-
-
-        if( cursor != null && cursor.getCount() > 0){
-            cursor.moveToFirst();
-            do {
-
-                buf.add(cursor.getString(0));
-
-            } while (cursor.moveToNext());
-
-        }
-
-        return buf;
-
-    }
 
     public static String getDbPath(Context ctx) {
         return ctx.getFilesDir().getPath() + "/../databases/runnerup.db";
