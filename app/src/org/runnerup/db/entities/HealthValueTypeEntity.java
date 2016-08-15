@@ -57,15 +57,15 @@ public class HealthValueTypeEntity extends AbstractTypeEntity {
     }
 
 
-    public void setHealthType(int value) {
+    public void setHealthTypeId(Long value) {
         values().put(Constants.DB.HEALTH_VALUE_TYPE.HEALTH_TYPE, value);
     }
 
-    public int getHealthType() {
+    public Long getHealthTypeId() {
         if (values().containsKey(Constants.DB.HEALTH_VALUE_TYPE.HEALTH_TYPE)) {
-            return values().getAsInteger(Constants.DB.HEALTH_VALUE_TYPE.HEALTH_TYPE);
+            return values().getAsLong(Constants.DB.HEALTH_VALUE_TYPE.HEALTH_TYPE);
         }
-        return -1;
+        return null;
     }
 
     public void setName(String value) {
@@ -115,7 +115,7 @@ public class HealthValueTypeEntity extends AbstractTypeEntity {
     public static List<HealthValueTypeEntity> getAll(SQLiteDatabase db, int healthTypeId){
         List<HealthValueTypeEntity> list = new ArrayList<HealthValueTypeEntity>();
         for (AbstractTypeEntity a : getAll(db, new HealthValueTypeEntity())) {
-            if (((HealthValueTypeEntity)a).getHealthType() == healthTypeId)
+            if (((HealthValueTypeEntity)a).getHealthTypeId() == healthTypeId)
             {
                 list.add((HealthValueTypeEntity)a);
             }

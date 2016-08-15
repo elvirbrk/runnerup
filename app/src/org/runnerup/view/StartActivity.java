@@ -32,14 +32,18 @@ import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Typeface;
 import android.location.Location;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Xml;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -51,7 +55,9 @@ import android.widget.CheckBox;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
@@ -64,7 +70,6 @@ import org.runnerup.common.tracker.TrackerState;
 import org.runnerup.common.util.Constants;
 import org.runnerup.common.util.Constants.DB;
 import org.runnerup.db.DBHelper;
-import org.runnerup.db.entities.AbstractEntity;
 import org.runnerup.db.entities.AbstractTypeEntity;
 import org.runnerup.db.entities.HealthTypeEntity;
 import org.runnerup.db.entities.HealthValueTypeEntity;
@@ -92,16 +97,15 @@ import org.runnerup.workout.Workout;
 import org.runnerup.workout.Workout.StepListEntry;
 import org.runnerup.workout.WorkoutBuilder;
 import org.runnerup.workout.WorkoutSerializer;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
-import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.ListIterator;
 import java.util.Locale;
 
 @TargetApi(Build.VERSION_CODES.FROYO)
@@ -324,13 +328,13 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         manualNotes = (EditText) findViewById(R.id.manual_notes);
 
         healthType = (TitleSpinner) findViewById(R.id.health_type);
-        healthValueType = (TitleSpinner) findViewById(R.id.health_value_type);
-        healthUnit = (TitleSpinner) findViewById(R.id.health_unit);
+        //healthValueType = (TitleSpinner) findViewById(R.id.health_value_type);
+        //healthUnit = (TitleSpinner) findViewById(R.id.health_unit);
         healthDate = (TitleSpinner) findViewById(R.id.health_date);
         healthTime = (TitleSpinner) findViewById(R.id.health_time);
 
         healthType.setOnSelectedListener(onSetHealthType);
-        healthValueType.setOnSelectedListener(onSetHealthValueType);
+        //healthValueType.setOnSelectedListener(onSetHealthValueType);
 
         if (getParent() != null && getParent().getIntent() != null) {
             Intent i = getParent().getIntent();
@@ -1173,11 +1177,104 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         public void onSelected(Spinner spiner, int newValue) throws IllegalArgumentException {
             int pos = healthType.getValueId();
 
-        loadHealthValueTypes(pos);
+            //loadHealthValueTypes(pos);
+
+
+            loadHealthTypeLayout(pos);
 
         }
 
     };
+
+    private void loadHealthTypeLayout(int pos) {
+        HealthTypeEntity ht = new HealthTypeEntity();
+        ht.readByPrimaryKey(mDB, pos);
+
+        RelativeLayout tabHealth = (RelativeLayout) findViewById(R.id.tab_health);
+        tabHealth.removeViews(3, tabHealth.getChildCount()-3);
+
+
+        int layId = R.id.health_time;
+        for (HealthValueTypeEntity hvt : ht.getValueTypes()
+             ) {
+
+            layId = createHealthValueTypeEntry(hvt, layId);
+        }
+    }
+
+    private int createHealthValueTypeEntry(HealthValueTypeEntity hvt, int layId) {
+        RelativeLayout tabHealth = (RelativeLayout) findViewById(R.id.tab_health);
+
+
+        RelativeLayout.LayoutParams lp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.WRAP_CONTENT);
+        lp.addRule(RelativeLayout.BELOW, layId);
+
+        RelativeLayout rLay = new RelativeLayout(this);
+
+        LinearLayout lLay = new LinearLayout(this);
+        lLay.setOrientation(LinearLayout.HORIZONTAL);
+
+        TextView vName = new TextView(this);
+        vName.setText(hvt.getName());
+        vName.setMinimumWidth(200);
+        vName.setTypeface(null, Typeface.BOLD);
+        lLay.addView(vName);
+
+        //NumberPicker nValue = new NumberPicker(this, attributes);
+        TitleSpinner nValue = new TitleSpinner(this, getAttributeSet(R.xml.numberpicker_att));
+        //nValue.setTitle(hvt.getName());
+        lLay.addView(nValue);
+
+        TitleSpinner nUnit = new TitleSpinner(this, getAttributeSet(R.xml.txt_id_att));
+        nUnit.setAdapter(loadHealthUnits(nUnit, hvt.getId()));
+        lLay.addView(nUnit);
+
+        lLay.setGravity(Gravity.CENTER_VERTICAL);
+        //lLay.setLayoutParams(LinearLayout.LayoutParams.MATCH_PARENT);
+
+        rLay.addView(lLay);
+
+        rLay.setLayoutParams(lp);
+        rLay.setId(layId+1);
+        tabHealth.addView(rLay);
+        return rLay.getId();
+    }
+
+    @Nullable
+    private AttributeSet getAttributeSet(int res) {
+        XmlPullParser parser = getResources().getXml(res);
+        AttributeSet attributes = null;
+        int state = 0;
+        do {
+            try {
+                state = parser.next();
+            } catch (XmlPullParserException e1) {
+                e1.printStackTrace();
+            } catch (IOException e1) {
+                e1.printStackTrace();
+            }
+            if (state == XmlPullParser.START_TAG) {
+                //if (parser.getName().equals("TextView")) {
+                    attributes = Xml.asAttributeSet(parser);
+                    break;
+                //}
+            }
+        } while(state != XmlPullParser.END_DOCUMENT);
+        return attributes;
+    }
+
+    private ArrayAdapter<AbstractTypeEntity> loadHealthUnits(TitleSpinner nUnit, Long id) {
+        List<UnitEntity> types = UnitEntity.getAll(mDB, id.intValue());
+
+        // Creating adapter for spinner
+        NameIdAdapter dataAdapter = new NameIdAdapter(this,android.R.layout.simple_spinner_item, types.toArray(new AbstractTypeEntity[types.size()]));
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        return dataAdapter;
+    }
 
     final OnSelectedListener onSetHealthValueType = new OnSelectedListener() {
 
@@ -1186,7 +1283,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
             int pos = healthValueType.getValueId();
 
-            loadHealthUnits(pos);
+            //loadHealthUnits(pos);
 
 /* TODO Dynamic layout
             // database handler
@@ -1236,16 +1333,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
     }
 
     private void loadHealthUnits(int healthValueTypeId) {
-        List<UnitEntity> types = UnitEntity.getAll(mDB, healthValueTypeId);
 
-        // Creating adapter for spinner
-        NameIdAdapter dataAdapter = new NameIdAdapter(this,android.R.layout.simple_spinner_item, types.toArray(new AbstractTypeEntity[types.size()]));
-
-        // Drop down layout style - list view with radio button
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        // attaching data adapter to spinner
-        healthUnit.setAdapter(dataAdapter);
     }
 
 }

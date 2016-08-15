@@ -32,7 +32,7 @@
         android:text="@string/Health_Type"
         runnerup:type="spinner_txt_id" />
 
-    <org.runnerup.widget.TitleSpinner
+    <!--<org.runnerup.widget.TitleSpinner
         android:id="@+id/health_value_type"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -51,12 +51,12 @@
         android:prompt="@string/Type"
         android:text="@string/Health_Unit"
         runnerup:type="spinner_txt_id" />
-
+-->
     <org.runnerup.widget.TitleSpinner
         android:id="@+id/health_date"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@+id/health_unit"
+        android:layout_below="@+id/health_type"
         android:prompt="@string/Type"
         android:defaultValue="today"
         android:text="@string/Date"
@@ -74,7 +74,7 @@
 
 
 
-       <org.runnerup.widget.TitleSpinner
+       <!--<org.runnerup.widget.TitleSpinner
         android:id="@+id/health_value"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -97,7 +97,7 @@
         android:gravity="top|left"
         android:inputType="textMultiLine"
         android:singleLine="false"
-        android:hint="@string/Add_workout_notes" />
+        android:hint="@string/Add_workout_notes" />-->
 
 </RelativeLayout>
 

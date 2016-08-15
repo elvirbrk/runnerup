@@ -44,10 +44,10 @@
     @TargetApi(Build.VERSION_CODES.FROYO)
     public class HealthTypeEntity extends AbstractTypeEntity {
 
-
+        private List<HealthValueTypeEntity> values;
         public HealthTypeEntity() {
             super();
-
+            //values = new ArrayList<HealthValueTypeEntity>();
         }
 
         public HealthTypeEntity(Cursor c) {
@@ -95,7 +95,37 @@
             return null;
         }
 
+        public void addValueType(HealthValueTypeEntity val) {
+            if (val.getHealthTypeId() != null && (this.getId() == null || !val.getHealthTypeId().equals(this.getId()))) {
+                throw new IllegalArgumentException("Foreign key of lap (" + val.getHealthTypeId() +
+                        ") doesn't match the activity primary key (" + this.getId() + ")");
+            }
 
+            if (val.getHealthTypeId() == null && this.getId() != null) {
+                val.setHealthTypeId(this.getId());
+            }
+
+            getValueTypes().add(val);
+        }
+
+        public void addValueTypes(List<HealthValueTypeEntity> vals) {
+            for (HealthValueTypeEntity v : vals) {
+                this.addValueType(v);
+            }
+        }
+
+        public void putValueType(List<HealthValueTypeEntity> vals) {
+            this.getValueTypes().clear();
+            this.addValueTypes(vals);
+        }
+
+        public List<HealthValueTypeEntity> getValueTypes() {
+            if (values == null) {
+                values = HealthValueTypeEntity.getAll(db,getId().intValue());
+            }
+
+            return values;
+        }
 
      }
 
