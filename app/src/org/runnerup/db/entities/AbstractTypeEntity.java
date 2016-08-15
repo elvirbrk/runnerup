@@ -43,6 +43,7 @@ public abstract class AbstractTypeEntity extends AbstractEntity {
                 cursor.moveToFirst();
                 do {
                     AbstractTypeEntity ae = inst.getClass().getDeclaredConstructor(Cursor.class).newInstance(cursor);
+                    ae.db = db;
 
                     list.add(ae);
 

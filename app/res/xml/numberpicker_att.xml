@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<org.runnerup.widget.TitleSpinner xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:runnerup="http://schemas.android.com/apk/res-auto"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"
+        android:layout_weight="4"
+        android:prompt="@string/value"
+        runnerup:type="numberpicker">
+</org.runnerup.widget.TitleSpinner>

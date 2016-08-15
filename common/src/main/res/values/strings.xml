@@ -104,6 +104,7 @@
   <string name="Disconnect">Disconnect</string>
   <string name="Resume">Resume</string>
   <string name="Save_activity">Save activity</string>
+  <string name="Save_entry">Save entry</string>
   <string name="Upload_activity">Upload activity</string>
   <string name="Uploaded">Uploaded</string>
   <string name="Finished">Finished</string>
