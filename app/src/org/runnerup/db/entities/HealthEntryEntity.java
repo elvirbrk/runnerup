@@ -31,6 +31,8 @@ import android.util.Log;
 
 import org.runnerup.common.util.Constants;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -43,6 +45,7 @@ import java.util.concurrent.TimeUnit;
 public class HealthEntryEntity extends AbstractEntity {
 
     private List<HealthValueEntity> values;
+    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH.mm.ss");
 
     public HealthEntryEntity() {
         super();
@@ -70,17 +73,22 @@ public class HealthEntryEntity extends AbstractEntity {
         return null;
     }
 
-    private void setStartTime(Long value) {
-        values().put(Constants.DB.HEALTH_ENTRY.TIME, value);
+//    private void setTime(Long value) {
+//        values().put(Constants.DB.HEALTH_ENTRY.TIME, value);
+//    }
+
+    public void setTime(Date date) {
+
+        values().put(Constants.DB.HEALTH_ENTRY.TIME, dateFormat.format(date));
     }
 
-    public void setStartTime(Date date) {
-        setStartTime(TimeUnit.MILLISECONDS.toSeconds(date.getTime()));
-    }
-
-    public Long getStartTime() {
+    public Date getTime() {
         if (values().containsKey(Constants.DB.HEALTH_ENTRY.TIME)) {
-            return values().getAsLong(Constants.DB.HEALTH_ENTRY.TIME);
+            try {
+                return dateFormat.parse(values().getAsString(Constants.DB.HEALTH_ENTRY.TIME));
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
         return null;
     }

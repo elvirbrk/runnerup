@@ -63,6 +63,7 @@ import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.runnerup.BuildConfig;
 import org.runnerup.R;
@@ -71,7 +72,9 @@ import org.runnerup.common.util.Constants;
 import org.runnerup.common.util.Constants.DB;
 import org.runnerup.db.DBHelper;
 import org.runnerup.db.entities.AbstractTypeEntity;
+import org.runnerup.db.entities.HealthEntryEntity;
 import org.runnerup.db.entities.HealthTypeEntity;
+import org.runnerup.db.entities.HealthValueEntity;
 import org.runnerup.db.entities.HealthValueTypeEntity;
 import org.runnerup.db.entities.UnitEntity;
 import org.runnerup.hr.MockHRProvider;
@@ -84,6 +87,7 @@ import org.runnerup.tracker.Tracker;
 import org.runnerup.tracker.component.TrackerHRM;
 import org.runnerup.tracker.component.TrackerWear;
 import org.runnerup.util.Formatter;
+import org.runnerup.util.HealthValueHelper;
 import org.runnerup.util.SafeParse;
 import org.runnerup.util.TickListener;
 import org.runnerup.widget.NameIdAdapter;
@@ -164,6 +168,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
     final WorkoutStepsAdapter advancedWorkoutStepsAdapter = new WorkoutStepsAdapter();
 
     boolean manualSetValue = false;
+    boolean healthSetValue = false;
     TitleSpinner manualSport = null;
     TitleSpinner manualDate = null;
     TitleSpinner manualTime = null;
@@ -173,10 +178,11 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
     EditText manualNotes = null;
 
     TitleSpinner healthType = null;
-    TitleSpinner healthValueType = null;
-    TitleSpinner healthUnit = null;
     TitleSpinner healthDate = null;
     TitleSpinner healthTime = null;
+    EditText healthNotes = null;
+
+    List<HealthValueHelper> healthValues = null;
 
     SQLiteDatabase mDB = null;
 
@@ -595,6 +601,8 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
                 loadAdvanced(null);
             } else if (tabId.contentEquals(TAB_MANUAL)) {
                 startButton.setText(getString(R.string.Save_activity));
+            } else if (tabId.contentEquals(TAB_HEALTH)) {
+                startButton.setText(getString(R.string.Save_entry));
             }
             updateView();
         }
@@ -632,6 +640,9 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         public void onClick(View v) {
             if (tabHost.getCurrentTabTag().contentEquals(TAB_MANUAL)) {
                 manualSaveButtonClick.onClick(v);
+                return;
+            } else if (tabHost.getCurrentTabTag().contentEquals(TAB_HEALTH)) {
+                healthSaveButtonClick.onClick(v);
                 return;
             } else if (mGpsStatus.isEnabled() == false) {
                 startActivity(new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS));
@@ -687,6 +698,11 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
             gpsInfoLayout.setVisibility(View.GONE);
             startButton.setEnabled(manualSetValue);
             startButton.setText(getString(R.string.Save_activity));
+            return;
+        } else if (tabHost.getCurrentTabTag().contentEquals(TAB_HEALTH)) {
+            gpsInfoLayout.setVisibility(View.GONE);
+            startButton.setEnabled(manualSetValue);
+            startButton.setText(getString(R.string.Save_entry));
             return;
         } else if (mGpsStatus.isEnabled() == false) {
             startButton.setEnabled(true);
@@ -1059,6 +1075,24 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         }
     };
 
+    final OnSetValueListener onSetValueHealth = new OnSetValueListener() {
+
+        @Override
+        public String preSetValue(String newValue)
+                throws IllegalArgumentException {
+            healthSetValue = true;
+            startButton.setEnabled(true);
+            return newValue;
+        }
+
+        @Override
+        public int preSetValue(int newValue) throws IllegalArgumentException {
+            healthSetValue = true;
+            startButton.setEnabled(true);
+            return newValue;
+        }
+    };
+
     void setManualPace(String distance, String duration) {
         Log.e(getClass().getName(), "distance: >" + distance + "< duration: >" + duration + "<");
         double dist = SafeParse.parseDouble(distance, 0); // convert to meters
@@ -1171,11 +1205,80 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         }
     };
 
+    final OnClickListener healthSaveButtonClick = new OnClickListener() {
+
+        @Override
+        public void onClick(View v) {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(StartActivity.this);
+            builder.setTitle(getString(R.string.Health_Value));
+            builder.setMessage(getString(R.string.Are_you_sure));
+            builder.setPositiveButton(getString(R.string.Yes),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            saveHealthValues();
+                            dialog.dismiss();
+
+                        }
+                    });
+            builder.setNegativeButton(getString(R.string.No),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Do nothing but close the dialog
+                            dialog.dismiss();
+                        }
+
+                    });
+
+            builder.show();
+
+
+        }
+    };
+
+    private void saveHealthValues() {
+        HealthEntryEntity entry = new HealthEntryEntity();
+
+        entry.setHealthType(healthType.getValueId());
+
+        Date date = healthDate.getValueDate();
+        Date time = healthTime.getValueDate();
+
+        Date dt = new Date(date.getDate());
+        dt.setTime(time.getTime());
+
+        entry.setTime(dt);
+
+        //String notes = healthNotes.getText().toString().trim();
+
+        long eId = entry.insert(mDB);
+
+        for (HealthValueHelper hvh : healthValues
+             ) {
+            HealthValueEntity hv = new HealthValueEntity();
+
+            hv.setHealthEntryId(eId);
+            hv.setType(hvh.getHVT().getId());
+            hv.setUnit(hvh.getUnit().getValueId());
+            hv.setValue(Double.valueOf(hvh.getValue().getValue().toString()));
+
+            hv.insert(mDB);
+            entry.addValue(hv);
+        }
+
+        Toast.makeText(this, "Health value saved.", Toast.LENGTH_SHORT).show();
+        startButton.setEnabled(false);
+        //Intent intent = new Intent(StartActivity.this, DetailActivity.class);
+        //intent.putExtra("mode", "save");
+        //intent.putExtra("ID", eId);
+        //StartActivity.this.startActivityForResult(intent, 0);
+    }
+
     final OnSelectedListener onSetHealthType = new OnSelectedListener() {
 
         @Override
         public void onSelected(Spinner spiner, int newValue) throws IllegalArgumentException {
-            int pos = healthType.getValueId();
+            Long pos = healthType.getValueId();
 
             //loadHealthValueTypes(pos);
 
@@ -1186,13 +1289,14 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
     };
 
-    private void loadHealthTypeLayout(int pos) {
+    private void loadHealthTypeLayout(Long pos) {
         HealthTypeEntity ht = new HealthTypeEntity();
         ht.readByPrimaryKey(mDB, pos);
 
         RelativeLayout tabHealth = (RelativeLayout) findViewById(R.id.tab_health);
         tabHealth.removeViews(3, tabHealth.getChildCount()-3);
 
+        healthValues = new ArrayList<>();
 
         int layId = R.id.health_time;
         for (HealthValueTypeEntity hvt : ht.getValueTypes()
@@ -1212,25 +1316,35 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         RelativeLayout rLay = new RelativeLayout(this);
 
         LinearLayout lLay = new LinearLayout(this);
+        LinearLayout.LayoutParams lpl = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         lLay.setOrientation(LinearLayout.HORIZONTAL);
+        lLay.setLayoutParams(lpl);
 
-        TextView vName = new TextView(this);
+        /*TextView vName = new TextView(this);
         vName.setText(hvt.getName());
         vName.setMinimumWidth(200);
         vName.setTypeface(null, Typeface.BOLD);
-        lLay.addView(vName);
+        lLay.addView(vName);*/
 
-        //NumberPicker nValue = new NumberPicker(this, attributes);
+        LinearLayout.LayoutParams lpv = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lpv.weight = 1;
         TitleSpinner nValue = new TitleSpinner(this, getAttributeSet(R.xml.numberpicker_att));
-        //nValue.setTitle(hvt.getName());
+        nValue.setOnSetValueListener(onSetValueManual);
+        nValue.setTitle(hvt.getName());
+        nValue.setLayoutParams(lpv);
         lLay.addView(nValue);
 
+        LinearLayout.LayoutParams lpu = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+        lpu.weight = 3;
         TitleSpinner nUnit = new TitleSpinner(this, getAttributeSet(R.xml.txt_id_att));
         nUnit.setAdapter(loadHealthUnits(nUnit, hvt.getId()));
+        nUnit.setLayoutParams(lpu);
         lLay.addView(nUnit);
 
         lLay.setGravity(Gravity.CENTER_VERTICAL);
         //lLay.setLayoutParams(LinearLayout.LayoutParams.MATCH_PARENT);
+
+        healthValues.add(new HealthValueHelper(hvt, nValue, nUnit));
 
         rLay.addView(lLay);
 
@@ -1276,35 +1390,6 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         return dataAdapter;
     }
 
-    final OnSelectedListener onSetHealthValueType = new OnSelectedListener() {
-
-        @Override
-        public void onSelected(Spinner spiner, int newValue) throws IllegalArgumentException {
-
-            int pos = healthValueType.getValueId();
-
-            //loadHealthUnits(pos);
-
-/* TODO Dynamic layout
-            // database handler
-            SQLiteDatabase db = DBHelper.getReadableDatabase(getApplicationContext());
-
-            // Spinner Drop down elements
-            List<String> lables = new LinkedList<>();
-
-            // Creating adapter for spinner
-            ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(this);
-
-            // Drop down layout style - list view with radio button
-            dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-            // attaching data adapter to spinner
-            healthDataType.setAdapter(dataAdapter);
-            */
-
-        }
-
-    };
 
     private void loadHealthTypes() {
         List<AbstractTypeEntity> types = HealthTypeEntity.getAll(mDB);
@@ -1319,21 +1404,6 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         healthType.setAdapter(dataAdapter);
     }
 
-    private void loadHealthValueTypes(int healthTypeId) {
-        List<HealthValueTypeEntity> types = HealthValueTypeEntity.getAll(mDB, healthTypeId);
 
-        // Creating adapter for spinner
-        NameIdAdapter dataAdapter = new NameIdAdapter(this,android.R.layout.simple_spinner_item, types.toArray(new AbstractTypeEntity[types.size()]));
-
-        // Drop down layout style - list view with radio button
-        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-
-        // attaching data adapter to spinner
-        healthValueType.setAdapter(dataAdapter);
-    }
-
-    private void loadHealthUnits(int healthValueTypeId) {
-
-    }
 
 }

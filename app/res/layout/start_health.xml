@@ -69,6 +69,7 @@
         android:layout_alignParentLeft="true"
         android:layout_below="@+id/health_date"
         android:prompt="@string/Type"
+        android:defaultValue="now"
         android:text="@string/Start_hour"
         runnerup:type="timepicker" />
 
