@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 public class HealthEntryEntity extends AbstractEntity {
 
     private List<HealthValueEntity> values;
-    private SimpleDateFormat dateFormat = new SimpleDateFormat("dd.MM.yyyy HH.mm.ss");
+    private static SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
     public HealthEntryEntity() {
         super();
@@ -166,4 +166,39 @@ public class HealthEntryEntity extends AbstractEntity {
 
         return at;
     };
+
+    public static List<HealthEntryEntity> getAll(SQLiteDatabase db, Long healthTypeId) {
+        List<AbstractEntity> list = getAll(db, new HealthEntryEntity(), Constants.DB.HEALTH_ENTRY.HEALTH_TYPE, healthTypeId.toString());
+
+        List<HealthEntryEntity> at = new ArrayList<>();
+
+        for (AbstractEntity ae:list
+                ) {
+            if(ae instanceof HealthEntryEntity)
+                at.add((HealthEntryEntity)ae);
+        }
+
+        return at;
+    }
+
+    public static List<HealthEntryEntity> getAll(SQLiteDatabase db, Long healthTypeId, Date startDate, Date endDate) {
+
+        List<AbstractEntity> list;
+        if (    startDate == null || endDate == null) {
+            list = getAll(db, new HealthEntryEntity(), Constants.DB.HEALTH_ENTRY.HEALTH_TYPE, healthTypeId.toString());
+        } else {
+            list = getAll(db, new HealthEntryEntity(), Constants.DB.HEALTH_ENTRY.HEALTH_TYPE, healthTypeId.toString(),
+                    Constants.DB.HEALTH_ENTRY.TIME, "'" + dateFormat.format(startDate) + "'", "'" + dateFormat.format(endDate) + "'");
+        }
+
+        List<HealthEntryEntity> at = new ArrayList<>();
+
+        for (AbstractEntity ae:list
+                ) {
+            if(ae instanceof HealthEntryEntity)
+                at.add((HealthEntryEntity)ae);
+        }
+
+        return at;
+    }
 }

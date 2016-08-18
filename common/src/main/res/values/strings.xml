@@ -107,6 +107,8 @@
   <string name="Save_entry">Save entry</string>
   <string name="workout">Workout</string>
   <string name="health">Health</string>
+  <string name="graph">Graph</string>
+  <string name="graphPeriod">Graph Period</string>
   <string name="Upload_activity">Upload activity</string>
   <string name="Uploaded">Uploaded</string>
   <string name="Finished">Finished</string>

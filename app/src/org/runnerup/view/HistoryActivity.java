@@ -22,9 +22,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
@@ -39,28 +42,45 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.ExpandableListAdapter;
 import android.widget.ExpandableListView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.SimpleCursorTreeAdapter;
+import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TextView;
+
+import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.LineGraphSeries;
 
 import org.runnerup.R;
 import org.runnerup.common.util.Constants;
 import org.runnerup.db.ActivityCleaner;
 import org.runnerup.db.DBHelper;
+import org.runnerup.db.entities.AbstractTypeEntity;
 import org.runnerup.db.entities.ActivityEntity;
 import org.runnerup.db.entities.HealthEntryEntity;
+import org.runnerup.db.entities.HealthTypeEntity;
 import org.runnerup.db.entities.HealthValueEntity;
+import org.runnerup.db.entities.HealthValueTypeEntity;
 import org.runnerup.util.Formatter;
 import org.runnerup.util.SimpleCursorLoader;
+import org.runnerup.widget.TitleSpinner;
 import org.runnerup.widget.WidgetUtil;
 import org.runnerup.workout.Sport;
 
 import java.text.DateFormat;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 
 @TargetApi(Build.VERSION_CODES.FROYO)
 public class HistoryActivity extends FragmentActivity implements Constants, OnItemClickListener,
@@ -68,15 +88,18 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
 
     final static String TAB_WORKOUT = "workout";
     final static String TAB_HEALTH = "health";
+    final static String TAB_GRAPH = "graph";
 
     SQLiteDatabase mDB = null;
     Formatter formatter = null;
 
     ListView listView = null;
     ExpandableListView listHealth = null;
+    LinearLayout graphLayout = null;
 
     CursorAdapter cursorAdapter = null;
     HistoryListHealthAdapter listAdapter = null;
+    TitleSpinner graphPeriod = null;
 
     TabHost tabHost = null;
 
@@ -89,6 +112,7 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
         listView = (ListView) findViewById(R.id.history_list);
         // get the listview
         listHealth = (ExpandableListView) findViewById(R.id.health_list);
+        graphLayout = (LinearLayout) findViewById(R.id.history_graph);
 
 
         mDB = DBHelper.getReadableDatabase(this);
@@ -110,7 +134,16 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
         tabSpec.setContent(R.id.tab_health);
         tabHost.addTab(tabSpec);
 
+        tabSpec = tabHost.newTabSpec(TAB_GRAPH);
+        tabSpec.setIndicator(WidgetUtil.createHoloTabIndicator(this, getString(R.string.graph)));
+        tabSpec.setContent(R.id.tab_graph);
+        tabHost.addTab(tabSpec);
+
         tabHost.setOnTabChangedListener(onTabChangeListener);
+
+
+        graphPeriod = (TitleSpinner) findViewById(R.id.graph_period);
+        graphPeriod.setOnSelectedListener(onSetGraphPeriod);
 
         this.getSupportLoaderManager().initLoader(0, null, this);
 
@@ -172,16 +205,148 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
                 return;
 
             else if (tabId.contentEquals(TAB_HEALTH)) {
-
-
-
-
                 // setting list adapter
                 listHealth.setAdapter(prepareHealthData());
+            } else if (tabId.contentEquals(TAB_GRAPH)) {
+                loadGraph(getPeriodStart());
             }
 
             //updateView();
         }
+    };
+
+    private Date getPeriodStart(){
+        String per = graphPeriod.getValue().toString();
+        Calendar c = Calendar.getInstance();
+        switch (per) {
+            case "Last week":
+                c.add(Calendar.DATE, -7);
+                break;
+            case "Last month":
+                c.add(Calendar.MONTH, -1);
+                break;
+            case "Last 6 months":
+                c.add(Calendar.MONTH, -6);
+                break;
+            case "Last year":
+                c.add(Calendar.YEAR, -1);
+                break;
+            case "All":
+                return null;
+        }
+
+        return c.getTime();
+    };
+
+    private void loadGraph(Date startDate) {
+
+        graphLayout.removeViewsInLayout(0,graphLayout.getChildCount()-1);
+        List<AbstractTypeEntity> hte = HealthTypeEntity.getAll(mDB);
+
+        for (AbstractTypeEntity ate: hte
+             ) {
+
+            //LayoutInflater infalInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            LayoutInflater infalInflater = LayoutInflater.from(this);
+            GraphView gv = (GraphView) infalInflater.inflate(R.layout.history_graph_row, graphLayout, false);
+
+//            final java.text.DateFormat dateTimeFormatter = android.text.format.DateFormat.getDateFormat(this);
+//            CustomLabelFormatter clf = new CustomLabelFormatter() {
+//                @Override
+//                public String formatLabel(double v, boolean b) {
+//                    if (b) {
+//                        // transform number to time
+//                        return dateTimeFormatter.format(new Date((long) v*1000));
+//                    } else {
+//                        return String.valueOf(v);
+//                    }
+//                }
+//            };
+//            gv.setCustomLabelFormatter(clf);
+
+
+
+            gv.setTitle(ate.getName());
+
+            List<HealthValueTypeEntity> hvtList = HealthValueTypeEntity.getAll(mDB, ate.getId().intValue());
+
+            HashMap<Long, List<DataPoint>> graphData = new HashMap<>();
+            for (HealthValueTypeEntity hv:hvtList
+                    ) {
+                graphData.put(hv.getId(), new ArrayList<DataPoint>());
+            }
+
+            List<HealthEntryEntity> heList = HealthEntryEntity.getAll(mDB, ate.getId(), startDate, new Date());
+
+            for (HealthEntryEntity he: heList
+                    ) {
+
+                for (HealthValueEntity hv:he.getValues()
+                        ) {
+                    DataPoint gvd = new DataPoint(he.getTime(), hv.getValue());
+
+                    graphData.get(hv.getValueTypeId()).add(gvd);
+                }
+
+
+
+            }
+
+            for (HealthValueTypeEntity hv:hvtList
+                    ) {
+                List<DataPoint> gvd = graphData.get(hv.getId());
+                LineGraphSeries series = new LineGraphSeries(gvd.toArray(new DataPoint[gvd.size()]));
+                series.setColor(Color.GREEN);
+                series.setDrawDataPoints(true);
+                series.setDataPointsRadius(10);
+                series.setThickness(8);
+
+                gv.addSeries(series);
+
+                // set date label formatter
+                gv.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(this));
+                gv.getGridLabelRenderer().setNumHorizontalLabels(3); // only 4 because of the space
+
+                // set manual x bounds to have nice steps
+                if (startDate != null) {
+                    gv.getViewport().setMinX(startDate.getTime());
+                    gv.getViewport().setMaxX((new Date()).getTime());
+                    gv.getViewport().setXAxisBoundsManual(true);
+                }
+
+                gv.getViewport().setMinY(0);
+                gv.getViewport().setMaxY(gv.getViewport().getMaxY(true));
+                gv.getViewport().setYAxisBoundsManual(true);
+
+
+                // as we use dates as labels, the human rounding to nice readable numbers
+                // is not nessecary
+                gv.getGridLabelRenderer().setHumanRounding(false);
+
+            }
+
+
+            //gv.getCustomLabelFormatter().formatLabel()
+
+            graphLayout.addView(gv, graphLayout.getChildCount()-1);
+
+        }
+
+    }
+
+    final TitleSpinner.OnSelectedListener onSetGraphPeriod = new TitleSpinner.OnSelectedListener() {
+
+        @Override
+        public void onSelected(Spinner spiner, int newValue) throws IllegalArgumentException {
+            String pos = graphPeriod.getValue().toString();
+
+            //loadHealthValueTypes(pos);
+
+
+            loadGraph(getPeriodStart());
+
+        }
+
     };
 
     private HistoryListHealthAdapter prepareHealthData() {

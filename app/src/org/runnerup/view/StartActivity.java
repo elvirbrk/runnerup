@@ -108,6 +108,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -1236,6 +1237,22 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         }
     };
 
+    public Date dateTime(Date date, Date time) {
+
+
+        Calendar c = Calendar.getInstance();
+        c.setTime(date);
+
+        Calendar t = Calendar.getInstance();
+        t.setTime(time);
+
+        c.set(Calendar.HOUR_OF_DAY, t.get(Calendar.HOUR_OF_DAY));
+        c.set(Calendar.MINUTE, t.get(Calendar.MINUTE));
+        c.set(Calendar.SECOND, t.get(Calendar.SECOND));
+
+        return c.getTime();
+    }
+
     private void saveHealthValues() {
         HealthEntryEntity entry = new HealthEntryEntity();
 
@@ -1244,10 +1261,9 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         Date date = healthDate.getValueDate();
         Date time = healthTime.getValueDate();
 
-        Date dt = new Date(date.getDate());
-        dt.setTime(time.getTime());
 
-        entry.setTime(dt);
+
+        entry.setTime(dateTime(date, time));
 
         //String notes = healthNotes.getText().toString().trim();
 
