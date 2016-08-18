@@ -22,18 +22,26 @@ import android.content.Context;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.graphics.Typeface;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.LoaderManager.LoaderCallbacks;
 import android.support.v4.content.Loader;
 import android.support.v4.widget.CursorAdapter;
+import android.support.v7.widget.RecyclerView;
+import android.text.Layout;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseExpandableListAdapter;
+import android.widget.ExpandableListAdapter;
+import android.widget.ExpandableListView;
 import android.widget.ListView;
+import android.widget.SimpleCursorTreeAdapter;
+import android.widget.TabHost;
 import android.widget.TextView;
 
 import org.runnerup.R;
@@ -41,19 +49,36 @@ import org.runnerup.common.util.Constants;
 import org.runnerup.db.ActivityCleaner;
 import org.runnerup.db.DBHelper;
 import org.runnerup.db.entities.ActivityEntity;
+import org.runnerup.db.entities.HealthEntryEntity;
+import org.runnerup.db.entities.HealthValueEntity;
 import org.runnerup.util.Formatter;
 import org.runnerup.util.SimpleCursorLoader;
+import org.runnerup.widget.WidgetUtil;
 import org.runnerup.workout.Sport;
+
+import java.text.DateFormat;
+import java.text.FieldPosition;
+import java.text.ParsePosition;
+import java.util.Date;
+import java.util.List;
 
 @TargetApi(Build.VERSION_CODES.FROYO)
 public class HistoryActivity extends FragmentActivity implements Constants, OnItemClickListener,
         LoaderCallbacks<Cursor> {
 
+    final static String TAB_WORKOUT = "workout";
+    final static String TAB_HEALTH = "health";
+
     SQLiteDatabase mDB = null;
     Formatter formatter = null;
 
     ListView listView = null;
+    ExpandableListView listHealth = null;
+
     CursorAdapter cursorAdapter = null;
+    HistoryListHealthAdapter listAdapter = null;
+
+    TabHost tabHost = null;
 
     /** Called when the activity is first created. */
 
@@ -62,6 +87,9 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
         super.onCreate(savedInstanceState);
         setContentView(R.layout.history);
         listView = (ListView) findViewById(R.id.history_list);
+        // get the listview
+        listHealth = (ExpandableListView) findViewById(R.id.health_list);
+
 
         mDB = DBHelper.getReadableDatabase(this);
         formatter = new Formatter(this);
@@ -69,6 +97,20 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
         listView.setOnItemClickListener(this);
         cursorAdapter = new HistoryListAdapter(this, null);
         listView.setAdapter(cursorAdapter);
+
+        tabHost = (TabHost) findViewById(R.id.tabhost_history);
+        tabHost.setup();
+        TabHost.TabSpec tabSpec = tabHost.newTabSpec(TAB_WORKOUT);
+        tabSpec.setIndicator(WidgetUtil.createHoloTabIndicator(this, getString(R.string.workout)));
+        tabSpec.setContent(R.id.tab_workout);
+        tabHost.addTab(tabSpec);
+
+        tabSpec = tabHost.newTabSpec(TAB_HEALTH);
+        tabSpec.setIndicator(WidgetUtil.createHoloTabIndicator(this, getString(R.string.health)));
+        tabSpec.setContent(R.id.tab_health);
+        tabHost.addTab(tabSpec);
+
+        tabHost.setOnTabChangedListener(onTabChangeListener);
 
         this.getSupportLoaderManager().initLoader(0, null, this);
 
@@ -121,6 +163,38 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
         super.onActivityResult(arg0, arg1, arg2);
         this.getSupportLoaderManager().restartLoader(0, null, this);
     }
+
+    final TabHost.OnTabChangeListener onTabChangeListener = new TabHost.OnTabChangeListener() {
+
+        @Override
+        public void onTabChanged(String tabId) {
+            if (tabId.contentEquals(TAB_WORKOUT))
+                return;
+
+            else if (tabId.contentEquals(TAB_HEALTH)) {
+
+
+
+
+                // setting list adapter
+                listHealth.setAdapter(prepareHealthData());
+            }
+
+            //updateView();
+        }
+    };
+
+    private HistoryListHealthAdapter prepareHealthData() {
+
+        listAdapter = new HistoryListHealthAdapter(this, getHealthData());
+
+        return listAdapter;
+    }
+
+    private List<HealthEntryEntity> getHealthData() {
+        return HealthEntryEntity.getAll(mDB);
+    }
+
 
     class HistoryListAdapter extends CursorAdapter {
         final LayoutInflater inflater;
@@ -201,5 +275,118 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
         public View newView(Context context, Cursor cursor, ViewGroup parent) {
             return inflater.inflate(R.layout.history_row, parent, false);
         }
+
     }
+
+    class HistoryListHealthAdapter extends BaseExpandableListAdapter {
+        final LayoutInflater inflater;
+        private Context _context;
+        private List<HealthEntryEntity> _listEntry; // header titles
+        // child data in format of header title, child title
+        //private HashMap<String, List<String>> _listDataChild;
+
+        public HistoryListHealthAdapter(Context context, List<HealthEntryEntity> listDataHeader) {
+            super();
+            inflater = LayoutInflater.from(context);
+            this._context = context;
+            this._listEntry = listDataHeader;
+        }
+
+
+        @Override
+        public HealthValueEntity getChild(int groupPosition, int childPosititon) {
+            return this._listEntry.get(groupPosition).getValues().get(childPosititon);
+        }
+
+        @Override
+        public long getChildId(int groupPosition, int childPosition) {
+            return childPosition;
+        }
+
+        @Override
+        public View getChildView(int groupPosition, final int childPosition,
+                                 boolean isLastChild, View convertView, ViewGroup parent) {
+
+            final HealthValueEntity child = (HealthValueEntity) getChild(groupPosition, childPosition);
+
+            if (convertView == null) {
+                LayoutInflater infalInflater = (LayoutInflater) this._context
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                convertView = infalInflater.inflate(R.layout.history_health_subrow, null);
+            }
+
+            TextView txtType = (TextView) convertView
+                    .findViewById(R.id.health_history_list_value_type);
+            txtType.setText(child.getValueType().getName());
+
+            TextView txtValue = (TextView) convertView
+                    .findViewById(R.id.health_history_list_value);
+            txtValue.setText(child.getValue().toString());
+
+            TextView txtUnit = (TextView) convertView
+                    .findViewById(R.id.health_history_list_unit);
+            txtUnit.setText(child.getUnit().getName());
+
+
+            return convertView;
+        }
+
+        @Override
+        public int getChildrenCount(int groupPosition) {
+            return this._listEntry.get(groupPosition).getValues().size();
+        }
+
+        @Override
+        public HealthEntryEntity getGroup(int groupPosition) {
+            return this._listEntry.get(groupPosition);
+        }
+
+        @Override
+        public int getGroupCount() {
+            return this._listEntry.size();
+        }
+
+        @Override
+        public long getGroupId(int groupPosition) {
+            return groupPosition;
+        }
+
+        @Override
+        public View getGroupView(int groupPosition, boolean isExpanded,
+                                 View convertView, ViewGroup parent) {
+            HealthEntryEntity header = (HealthEntryEntity) getGroup(groupPosition);
+            if (convertView == null) {
+                LayoutInflater infalInflater = (LayoutInflater) this._context
+                        .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+                convertView = infalInflater.inflate(R.layout.history_health_row, null);
+            }
+
+            TextView lblTime = (TextView) convertView
+                    .findViewById(R.id.health_history_list_time);
+            lblTime.setTypeface(null, Typeface.BOLD);
+            String s = DateFormat.getDateTimeInstance().format(header.getTime());
+            lblTime.setText(s);
+
+            TextView lblType = (TextView) convertView
+                    .findViewById(R.id.health_history_list_type);
+            lblType.setTypeface(null, Typeface.BOLD);
+            lblType.setText(header.getHealthType().getName());
+
+            listHealth.expandGroup(groupPosition);
+
+            return convertView;
+        }
+
+        @Override
+        public boolean hasStableIds() {
+            return false;
+        }
+
+        @Override
+        public boolean isChildSelectable(int groupPosition, int childPosition) {
+            return true;
+        }
+
+    }
+
 }

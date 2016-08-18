@@ -87,7 +87,17 @@
         }
 
         public static List<AbstractTypeEntity> getAll(SQLiteDatabase db){
-            return AbstractTypeEntity.getAll(db, new HealthTypeEntity());
+            List<AbstractEntity> l = AbstractEntity.getAll(db, new HealthTypeEntity());
+
+            List<AbstractTypeEntity> at = new ArrayList<>();
+
+            for (AbstractEntity ae:l
+                 ) {
+                if(ae instanceof AbstractTypeEntity)
+                    at.add((AbstractTypeEntity)ae);
+            }
+
+            return at;
         };
 
         @Override

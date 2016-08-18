@@ -111,7 +111,7 @@ public class UnitEntity extends AbstractTypeEntity {
 
     public static List<UnitEntity> getAll(SQLiteDatabase db, int healthValueTypeId){
         List<UnitEntity> list = new ArrayList<UnitEntity>();
-        for (AbstractTypeEntity a : getAll(db, new UnitEntity())) {
+        for (AbstractEntity a : getAll(db, new UnitEntity())) {
             if (((UnitEntity)a).getHealtValueType() == healthValueTypeId)
             {
                 list.add((UnitEntity)a);

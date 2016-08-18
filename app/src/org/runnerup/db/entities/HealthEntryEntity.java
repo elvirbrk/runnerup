@@ -26,6 +26,7 @@
 
 import android.annotation.TargetApi;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Build;
 import android.util.Log;
 
@@ -62,15 +63,21 @@ public class HealthEntryEntity extends AbstractEntity {
     }
 
 
-    public void setHealthType(Long value) {
+    public void setHealthTypeId(Long value) {
         values().put(Constants.DB.HEALTH_ENTRY.HEALTH_TYPE, value);
     }
 
-    public Long getHealthType() {
+    public Long getHealthTypeId() {
         if (values().containsKey(Constants.DB.HEALTH_ENTRY.HEALTH_TYPE)) {
             return values().getAsLong(Constants.DB.HEALTH_ENTRY.HEALTH_TYPE);
         }
         return null;
+    }
+
+    public HealthTypeEntity getHealthType() {
+        HealthTypeEntity ht = new HealthTypeEntity();
+        ht.readByPrimaryKey(db, getHealthTypeId());
+        return ht;
     }
 
 //    private void setTime(Long value) {
@@ -139,6 +146,24 @@ public class HealthEntryEntity extends AbstractEntity {
     }
 
     public List<HealthValueEntity> getValues() {
+        if (values == null) {
+            values = HealthValueEntity.getAll(db,getId().intValue());
+        }
+
         return values;
     }
+
+    public static List<HealthEntryEntity> getAll(SQLiteDatabase db){
+        List<AbstractEntity> l = AbstractEntity.getAll(db, new HealthEntryEntity());
+
+        List<HealthEntryEntity> at = new ArrayList<>();
+
+        for (AbstractEntity ae:l
+                ) {
+            if(ae instanceof HealthEntryEntity)
+                at.add((HealthEntryEntity)ae);
+        }
+
+        return at;
+    };
 }

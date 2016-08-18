@@ -1239,7 +1239,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
     private void saveHealthValues() {
         HealthEntryEntity entry = new HealthEntryEntity();
 
-        entry.setHealthType(healthType.getValueId());
+        entry.setHealthTypeId(healthType.getValueId());
 
         Date date = healthDate.getValueDate();
         Date time = healthTime.getValueDate();
@@ -1258,8 +1258,8 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
             HealthValueEntity hv = new HealthValueEntity();
 
             hv.setHealthEntryId(eId);
-            hv.setType(hvh.getHVT().getId());
-            hv.setUnit(hvh.getUnit().getValueId());
+            hv.setValueTypeId(hvh.getHVT().getId());
+            hv.setUnitId(hvh.getUnit().getValueId());
             hv.setValue(Double.valueOf(hvh.getValue().getValue().toString()));
 
             hv.insert(mDB);

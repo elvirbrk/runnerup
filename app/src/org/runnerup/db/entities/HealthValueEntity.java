@@ -27,6 +27,7 @@
     import android.annotation.TargetApi;
     import android.content.Context;
     import android.database.Cursor;
+    import android.database.sqlite.SQLiteDatabase;
     import android.os.Build;
     import android.util.Log;
 
@@ -67,15 +68,21 @@
             return null;
         }
 
-        public void setType(Long value) {
+        public void setValueTypeId(Long value) {
             values().put(Constants.DB.HEALTH_VALUES.HEALTH_VALUE_TYPE, value);
         }
 
-        public Long getType() {
+        public Long getValueTypeId() {
             if (values().containsKey(Constants.DB.HEALTH_VALUES.HEALTH_VALUE_TYPE)) {
                 return values().getAsLong(Constants.DB.HEALTH_VALUES.HEALTH_VALUE_TYPE);
             }
             return null;
+        }
+
+        public HealthValueTypeEntity getValueType() {
+            HealthValueTypeEntity ht = new HealthValueTypeEntity();
+            ht.readByPrimaryKey(db, getValueTypeId());
+            return ht;
         }
 
         public void setValue(Double value) {
@@ -89,15 +96,21 @@
             return null;
         }
 
-        public void setUnit(Long value) {
+        public void setUnitId(Long value) {
             values().put(Constants.DB.HEALTH_VALUES.UNIT, value);
         }
 
-        public Long getUnit() {
+        public Long getUnitId() {
             if (values().containsKey(Constants.DB.HEALTH_VALUES.UNIT)) {
                 return values().getAsLong(Constants.DB.HEALTH_VALUES.UNIT);
             }
             return null;
+        }
+
+        public UnitEntity getUnit() {
+            UnitEntity ht = new UnitEntity();
+            ht.readByPrimaryKey(db, getUnitId());
+            return ht;
         }
 
 
@@ -123,5 +136,17 @@
             return null;
         }
 
+        public static List<HealthValueEntity> getAll(SQLiteDatabase db, int healthEntryId){
+            List<HealthValueEntity> list = new ArrayList<HealthValueEntity>();
+            for (AbstractEntity a : getAll(db, new HealthValueEntity())) {
+                if (((HealthValueEntity)a).getHealthEntryId() == healthEntryId)
+                {
+                    list.add((HealthValueEntity)a);
+                }
+
+            }
+
+            return list;
+        }
 
     }

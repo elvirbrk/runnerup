@@ -64,31 +64,4 @@ public abstract class AbstractTypeEntity extends AbstractEntity {
         return list;
     }
 
-        List<AbstractTypeEntity> list = new ArrayList<AbstractTypeEntity>();
-        try {
-            if( cursor != null && cursor.getCount() > 0){
-                cursor.moveToFirst();
-                do {
-                    AbstractTypeEntity ae = inst.getClass().getDeclaredConstructor(Cursor.class).newInstance(cursor);
-                    ae.db = db;
-
-                    list.add(ae);
-
-                } while (cursor.moveToNext());
-
-            }
-        } catch (InstantiationException e) {
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            e.printStackTrace();
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-        } catch (InvocationTargetException e) {
-            e.printStackTrace();
-        } finally {
-            cursor.close();
-        }
-        return list;
-    }
-
 }

@@ -114,7 +114,7 @@ public class HealthValueTypeEntity extends AbstractTypeEntity {
 
     public static List<HealthValueTypeEntity> getAll(SQLiteDatabase db, int healthTypeId){
         List<HealthValueTypeEntity> list = new ArrayList<HealthValueTypeEntity>();
-        for (AbstractTypeEntity a : getAll(db, new HealthValueTypeEntity())) {
+        for (AbstractEntity a : getAll(db, new HealthValueTypeEntity())) {
             if (((HealthValueTypeEntity)a).getHealthTypeId() == healthTypeId)
             {
                 list.add((HealthValueTypeEntity)a);
