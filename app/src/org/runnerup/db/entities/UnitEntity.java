@@ -76,6 +76,39 @@ public class UnitEntity extends AbstractTypeEntity {
         return null;
     }
 
+    public void setMinValue(Integer value) {
+        values().put(Constants.DB.UNITS.MIN_VALUE, value);
+    }
+
+    public Integer getMinValue() {
+        if (values().containsKey(Constants.DB.UNITS.MIN_VALUE)) {
+            return values().getAsInteger(Constants.DB.UNITS.MIN_VALUE);
+        }
+        return null;
+    }
+
+    public void setMaxValue(Integer value) {
+        values().put(Constants.DB.UNITS.MAX_VALUE, value);
+    }
+
+    public Integer getMaxValue() {
+        if (values().containsKey(Constants.DB.UNITS.MAX_VALUE)) {
+            return values().getAsInteger(Constants.DB.UNITS.MAX_VALUE);
+        }
+        return null;
+    }
+
+    public void setDefaultValue(Integer value) {
+        values().put(Constants.DB.UNITS.DEFAULT_VALUE, value);
+    }
+
+    public Integer getDefaultValue() {
+        if (values().containsKey(Constants.DB.UNITS.DEFAULT_VALUE)) {
+            return values().getAsInteger(Constants.DB.UNITS.DEFAULT_VALUE);
+        }
+        return null;
+    }
+
     public void setName(String value) {
         values().put(Constants.DB.UNITS.NAME, value);
     }
@@ -96,6 +129,9 @@ public class UnitEntity extends AbstractTypeEntity {
         columns.add(Constants.DB.UNITS.GROUP);
         columns.add(Constants.DB.UNITS.HEALTH_VALUE_TYPE);
         columns.add(Constants.DB.UNITS.NAME);
+        columns.add(Constants.DB.UNITS.MIN_VALUE);
+        columns.add(Constants.DB.UNITS.MAX_VALUE);
+        columns.add(Constants.DB.UNITS.DEFAULT_VALUE);
         return columns;
     }
 

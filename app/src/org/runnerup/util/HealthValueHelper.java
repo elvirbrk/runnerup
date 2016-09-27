@@ -1,6 +1,7 @@
 package org.runnerup.util;
 
 import org.runnerup.db.entities.HealthValueTypeEntity;
+import org.runnerup.db.entities.UnitEntity;
 import org.runnerup.widget.TitleSpinner;
 
 /**
@@ -9,9 +10,9 @@ import org.runnerup.widget.TitleSpinner;
 public class HealthValueHelper {
     HealthValueTypeEntity hvt;
     TitleSpinner val;
-    TitleSpinner unit;
+    UnitEntity unit;
 
-    public HealthValueHelper(HealthValueTypeEntity hvt, TitleSpinner value, TitleSpinner unit){
+    public HealthValueHelper(HealthValueTypeEntity hvt, TitleSpinner value, UnitEntity unit){
         this.hvt = hvt;
         this.val = value;
         this.unit = unit;
@@ -33,11 +34,11 @@ public class HealthValueHelper {
         return val;
     }
 
-    public void setUnit(TitleSpinner u) {
+    public void setUnit(UnitEntity u) {
         unit = u;
     }
 
-    public TitleSpinner getUnit (){
+    public UnitEntity getUnit (){
         return unit;
     }
 }

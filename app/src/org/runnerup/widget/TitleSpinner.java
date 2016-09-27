@@ -44,12 +44,15 @@ import android.widget.TimePicker;
 
 import org.runnerup.R;
 import org.runnerup.db.entities.AbstractTypeEntity;
+import org.runnerup.db.entities.UnitEntity;
 import org.runnerup.util.SafeParse;
 
 import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+
+import static java.lang.Boolean.TRUE;
 
 @TargetApi(Build.VERSION_CODES.FROYO)
 public class TitleSpinner extends LinearLayout {
@@ -106,7 +109,7 @@ public class TitleSpinner extends LinearLayout {
         public void onSelected(Spinner spinner, int val);
     }
 
-    public TitleSpinner(Context context, AttributeSet attrs) {
+    public TitleSpinner(Context context, AttributeSet attrs, UnitEntity u) {
         super(context, attrs);
         mContext = context;
 
@@ -151,7 +154,7 @@ public class TitleSpinner extends LinearLayout {
             setupDistancePicker(context, attrs, arr, defaultValue);
         } else if ("numberpicker".contentEquals(type)) {
             mType = Type.TS_NUMBERPICKER;
-            setupNumberPicker(context, attrs, arr, defaultValue);
+            setupNumberPicker(context, attrs, arr, defaultValue, u);
         } else if ("spinner_txt_id".contentEquals(type)) {
             mType = Type.TS_SPINNER_TXT_ID;
             setupIdSpinner(context, attrs, arr, defaultValue);
@@ -166,6 +169,12 @@ public class TitleSpinner extends LinearLayout {
         }
 
         arr.recycle(); // Do this when done.
+    }
+
+    public TitleSpinner(Context context, AttributeSet attrs) {
+
+        this(context, attrs, null);
+
     }
 
     private void setupEditText(final Context context, final AttributeSet attrs, TypedArray arr, CharSequence defaultValue) {
@@ -529,11 +538,16 @@ public class TitleSpinner extends LinearLayout {
         });
     }
 
-    private void setupNumberPicker(final Context context, AttributeSet attrs, final TypedArray arr, CharSequence defaultValue) {
+    private void setupNumberPicker(final Context context, AttributeSet attrs, final TypedArray arr, CharSequence defaultValue, UnitEntity u) {
         setValue(defaultValue, false);
 
         final NumberPicker numberPicker = new NumberPicker(context, attrs);
         numberPicker.setOrientation(VERTICAL);
+
+        if (u != null){
+            numberPicker.setRange(u.getMinValue(),u.getMaxValue(), TRUE);
+            mValue.setText(u.getDefaultValue());
+        }
 
         LinearLayout layout = (LinearLayout) findViewById(R.id.title_spinner);
         layout.setOnClickListener(new OnClickListener() {

@@ -1275,7 +1275,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
             hv.setHealthEntryId(eId);
             hv.setValueTypeId(hvh.getHVT().getId());
-            hv.setUnitId(hvh.getUnit().getValueId());
+            hv.setUnitId(hvh.getUnit().getId());
             hv.setValue(Double.valueOf(hvh.getValue().getValue().toString()));
 
             hv.insert(mDB);
@@ -1336,31 +1336,37 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         lLay.setOrientation(LinearLayout.HORIZONTAL);
         lLay.setLayoutParams(lpl);
 
-        /*TextView vName = new TextView(this);
-        vName.setText(hvt.getName());
-        vName.setMinimumWidth(200);
-        vName.setTypeface(null, Typeface.BOLD);
-        lLay.addView(vName);*/
+
+        UnitEntity unit = getHealthUnits(hvt.getId());
 
         LinearLayout.LayoutParams lpv = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         lpv.weight = 1;
-        TitleSpinner nValue = new TitleSpinner(this, getAttributeSet(R.xml.numberpicker_att));
+        AttributeSet as = getAttributeSet(R.xml.numberpicker_att);
+        TitleSpinner nValue = new TitleSpinner(this, as, unit);
         nValue.setOnSetValueListener(onSetValueManual);
         nValue.setTitle(hvt.getName());
         nValue.setLayoutParams(lpv);
         lLay.addView(nValue);
 
+//        LinearLayout.LayoutParams lpu = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
+//        lpu.weight = 3;
+//        TitleSpinner nUnit = new TitleSpinner(this, getAttributeSet(R.xml.txt_id_att));
+//        nUnit.setAdapter(loadHealthUnits(nUnit, hvt.getId()));
+//        nUnit.setLayoutParams(lpu);
+//        lLay.addView(nUnit);
+
         LinearLayout.LayoutParams lpu = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
         lpu.weight = 3;
-        TitleSpinner nUnit = new TitleSpinner(this, getAttributeSet(R.xml.txt_id_att));
-        nUnit.setAdapter(loadHealthUnits(nUnit, hvt.getId()));
+        TextView nUnit = new TextView(this);
+        nUnit.setText(unit.getName());
+        nUnit.setTypeface(null, Typeface.BOLD);
         nUnit.setLayoutParams(lpu);
         lLay.addView(nUnit);
 
         lLay.setGravity(Gravity.CENTER_VERTICAL);
         //lLay.setLayoutParams(LinearLayout.LayoutParams.MATCH_PARENT);
 
-        healthValues.add(new HealthValueHelper(hvt, nValue, nUnit));
+        healthValues.add(new HealthValueHelper(hvt, nValue, unit));
 
         rLay.addView(lLay);
 
@@ -1404,6 +1410,13 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
         // attaching data adapter to spinner
         return dataAdapter;
+    }
+
+    private UnitEntity getHealthUnits(Long id) {
+        List<UnitEntity> types = UnitEntity.getAll(mDB, id.intValue());
+
+        //TODO: Replace 0 with metric/imperial selection
+        return types.get(0);
     }
 
 

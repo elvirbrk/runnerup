@@ -295,7 +295,7 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
             for (HealthValueTypeEntity hv:hvtList
                     ) {
                 List<DataPoint> gvd = graphData.get(hv.getId());
-                LineGraphSeries series = new LineGraphSeries(gvd.toArray(new DataPoint[gvd.size()]));
+                LineGraphSeries series = new LineGraphSeries<DataPoint>(gvd.toArray(new DataPoint[gvd.size()]));
                 series.setColor(Color.GREEN);
                 series.setDrawDataPoints(true);
                 series.setDataPointsRadius(10);
