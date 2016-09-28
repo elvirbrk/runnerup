@@ -25,6 +25,7 @@ import android.view.Gravity;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import org.runnerup.db.entities.UnitEntity;
 import org.runnerup.util.Formatter;
 
 import static java.lang.Boolean.TRUE;
@@ -81,9 +82,9 @@ public class DecimalPicker extends LinearLayout {
 
     public void setValue(double s) {
         int h = (int)s;
-        int f = (int)((s-h) * 10);
+        int f = (int)((10*s-10*h));
         wholePart.setValue((int) h);
-        decimalPart.setValue((int) s);
+        decimalPart.setValue((int) f);
     }
 
     @Override

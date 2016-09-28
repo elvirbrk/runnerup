@@ -109,6 +109,17 @@ public class UnitEntity extends AbstractTypeEntity {
         return null;
     }
 
+    public void setDecimals(Integer value) {
+        values().put(Constants.DB.UNITS.DECIMALS, value);
+    }
+
+    public Integer getDecimals() {
+        if (values().containsKey(Constants.DB.UNITS.DECIMALS)) {
+            return values().getAsInteger(Constants.DB.UNITS.DECIMALS);
+        }
+        return null;
+    }
+
     public void setName(String value) {
         values().put(Constants.DB.UNITS.NAME, value);
     }
@@ -132,6 +143,7 @@ public class UnitEntity extends AbstractTypeEntity {
         columns.add(Constants.DB.UNITS.MIN_VALUE);
         columns.add(Constants.DB.UNITS.MAX_VALUE);
         columns.add(Constants.DB.UNITS.DEFAULT_VALUE);
+        columns.add(Constants.DB.UNITS.DECIMALS);
         return columns;
     }
 

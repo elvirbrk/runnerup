@@ -19,6 +19,7 @@ package org.runnerup.widget;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.app.DownloadManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
@@ -66,6 +67,7 @@ public class TitleSpinner extends LinearLayout {
         TS_DURATIONPICKER,
         TS_DISTANCEPICKER,
         TS_NUMBERPICKER,
+        TS_DECIMALPICKER,
         TS_SPINNER_TXT_ID
     }
 
@@ -153,8 +155,13 @@ public class TitleSpinner extends LinearLayout {
             mType = Type.TS_DISTANCEPICKER;
             setupDistancePicker(context, attrs, arr, defaultValue);
         } else if ("numberpicker".contentEquals(type)) {
-            mType = Type.TS_NUMBERPICKER;
-            setupNumberPicker(context, attrs, arr, defaultValue, u);
+            if (u != null && u.getDecimals() > 0){
+                mType = Type.TS_DECIMALPICKER;
+                setupDecimalPicker(context, attrs, arr, defaultValue, u);
+            } else {
+                mType = Type.TS_NUMBERPICKER;
+                setupNumberPicker(context, attrs, arr, defaultValue, u);
+            }
         } else if ("spinner_txt_id".contentEquals(type)) {
             mType = Type.TS_SPINNER_TXT_ID;
             setupIdSpinner(context, attrs, arr, defaultValue);
@@ -546,7 +553,7 @@ public class TitleSpinner extends LinearLayout {
 
         if (u != null){
             numberPicker.setRange(u.getMinValue(),u.getMaxValue(), TRUE);
-            mValue.setText(u.getDefaultValue());
+            mValue.setText(u.getDefaultValue().toString());
         }
 
         LinearLayout layout = (LinearLayout) findViewById(R.id.title_spinner);
@@ -588,7 +595,7 @@ public class TitleSpinner extends LinearLayout {
     }
 
     private void setupDecimalPicker(final Context context, AttributeSet attrs, TypedArray arr,
-                                     CharSequence defaultValue) {
+                                     CharSequence defaultValue, UnitEntity u) {
         if (defaultValue != null) {
             mValue.setText(defaultValue);
         } else {
@@ -596,6 +603,11 @@ public class TitleSpinner extends LinearLayout {
         }
 
         final DecimalPicker decimalPicker = new DecimalPicker(context, attrs);
+
+        if (u != null){
+            decimalPicker.setRange(u.getMinValue(),u.getMaxValue(), u.getDecimals());
+            mValue.setText(u.getDefaultValue().toString());
+        }
 
         LinearLayout layout = (LinearLayout) findViewById(R.id.title_spinner);
         layout.setOnClickListener(new OnClickListener() {
@@ -856,6 +868,7 @@ public class TitleSpinner extends LinearLayout {
             case TS_EDITTEXT:
             case TS_DATEPICKER:
             case TS_TIMEPICKER:
+			case TS_DECIMALPICKER:
                 return mValue.getText();
             case TS_DURATIONPICKER:
             case TS_DISTANCEPICKER:
