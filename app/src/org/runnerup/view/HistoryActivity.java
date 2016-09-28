@@ -25,6 +25,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -76,6 +77,8 @@ import java.text.ParsePosition;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -103,7 +106,9 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
 
     TabHost tabHost = null;
 
-    /** Called when the activity is first created. */
+    /**
+     * Called when the activity is first created.
+     */
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -164,7 +169,7 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
 
     @Override
     public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
-        String[] from = new String[] {
+        String[] from = new String[]{
                 "_id", DB.ACTIVITY.START_TIME,
                 DB.ACTIVITY.DISTANCE, DB.ACTIVITY.TIME, DB.ACTIVITY.SPORT
         };
@@ -215,7 +220,7 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
         }
     };
 
-    private Date getPeriodStart(){
+    private Date getPeriodStart() {
         String per = graphPeriod.getValue().toString();
         Calendar c = Calendar.getInstance();
         switch (per) {
@@ -236,15 +241,17 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
         }
 
         return c.getTime();
-    };
+    }
+
+    ;
 
     private void loadGraph(Date startDate) {
 
-        graphLayout.removeViewsInLayout(0,graphLayout.getChildCount()-1);
+        graphLayout.removeViewsInLayout(0, graphLayout.getChildCount() - 1);
         List<AbstractTypeEntity> hte = HealthTypeEntity.getAll(mDB);
 
-        for (AbstractTypeEntity ate: hte
-             ) {
+        for (AbstractTypeEntity ate : hte
+                ) {
 
             //LayoutInflater infalInflater = (LayoutInflater) this.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
             LayoutInflater infalInflater = LayoutInflater.from(this);
@@ -265,23 +272,29 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
 //            gv.setCustomLabelFormatter(clf);
 
 
-
             gv.setTitle(ate.getName());
 
             List<HealthValueTypeEntity> hvtList = HealthValueTypeEntity.getAll(mDB, ate.getId().intValue());
 
             HashMap<Long, List<DataPoint>> graphData = new HashMap<>();
-            for (HealthValueTypeEntity hv:hvtList
+            for (HealthValueTypeEntity hv : hvtList
                     ) {
                 graphData.put(hv.getId(), new ArrayList<DataPoint>());
             }
 
             List<HealthEntryEntity> heList = HealthEntryEntity.getAll(mDB, ate.getId(), startDate, new Date());
 
-            for (HealthEntryEntity he: heList
+            Collections.sort(heList, new Comparator<HealthEntryEntity>() {
+                @Override
+                public int compare(HealthEntryEntity a, HealthEntryEntity b) {
+                    return a.getTime().compareTo(b.getTime());
+                }
+            });
+
+            for (HealthEntryEntity he : heList
                     ) {
 
-                for (HealthValueEntity hv:he.getValues()
+                for (HealthValueEntity hv : he.getValues()
                         ) {
                     DataPoint gvd = new DataPoint(he.getTime(), hv.getValue());
 
@@ -289,10 +302,9 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
                 }
 
 
-
             }
 
-            for (HealthValueTypeEntity hv:hvtList
+            for (HealthValueTypeEntity hv : hvtList
                     ) {
                 List<DataPoint> gvd = graphData.get(hv.getId());
                 LineGraphSeries series = new LineGraphSeries<DataPoint>(gvd.toArray(new DataPoint[gvd.size()]));
@@ -328,7 +340,7 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
 
             //gv.getCustomLabelFormatter().formatLabel()
 
-            graphLayout.addView(gv, graphLayout.getChildCount()-1);
+            graphLayout.addView(gv, graphLayout.getChildCount() - 1);
 
         }
 
@@ -357,7 +369,16 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
     }
 
     private List<HealthEntryEntity> getHealthData() {
-        return HealthEntryEntity.getAll(mDB);
+        List<HealthEntryEntity> list = HealthEntryEntity.getAll(mDB);
+
+        Collections.sort(list, new Comparator<HealthEntryEntity>() {
+            @Override
+            public int compare(HealthEntryEntity a, HealthEntryEntity b) {
+                return b.getTime().compareTo(a.getTime());
+            }
+        });
+
+        return list;
     }
 
 
@@ -372,7 +393,7 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
         @Override
         public void bindView(View view, Context context, Cursor cursor) {
             ActivityEntity ae = new ActivityEntity(cursor);
-            int[] to = new int[] {
+            int[] to = new int[]{
                     R.id.history_list_id,
                     R.id.history_list_start_time, R.id.history_list_distance,
                     R.id.history_list_time, R.id.history_list_pace, R.id.history_list_sport
