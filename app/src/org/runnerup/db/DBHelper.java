@@ -194,6 +194,25 @@ public class DBHelper extends SQLiteOpenHelper implements
             + (" on " + DB.FEED.TABLE + " (" + DB.FEED.START_TIME
             + ")");
 
+    private static final String CREATE_TABLE_SPORT = "create table "
+            + DB.SPORT.TABLE + " ( "
+            + ("_id integer primary key autoincrement, ")
+            + (DB.SPORT.NAME + " text,")
+            + (DB.SPORT.FAVORITE + " integer, ")
+            + ("deleted integer not null default 0, ")
+            + "nullColumnHack text null" + ");";
+
+    private static final String CREATE_TABLE_CALORIES = "create table "
+            + DB.CALORIES.TABLE + " ( "
+            + ("_id integer primary key autoincrement, ")
+            + (DB.CALORIES.SPORT_ID + " integer,")
+            + (DB.CALORIES.WEIGHT1 + " integer, ")
+            + (DB.CALORIES.WEIGHT2 + " integer, ")
+            + (DB.CALORIES.CALORIES1 + " integer, ")
+            + (DB.CALORIES.CALORIES2 + " integer, ")
+            + ("deleted integer not null default 0, ")
+            + "nullColumnHack text null" + ");";
+
     private static DBHelper sInstance = null;
     private Context mContext;
 
