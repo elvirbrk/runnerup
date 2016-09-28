@@ -6,6 +6,5 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_weight="1"
-        android:prompt="@string/Health_Unit"
         runnerup:type="spinner_txt_id">
 </org.runnerup.widget.TitleSpinner>

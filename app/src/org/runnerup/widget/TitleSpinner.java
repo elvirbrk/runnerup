@@ -573,6 +573,57 @@ public class TitleSpinner extends LinearLayout {
         });
     }
 
+    private void setupDecimalPicker(final Context context, AttributeSet attrs, TypedArray arr,
+                                     CharSequence defaultValue) {
+        if (defaultValue != null) {
+            mValue.setText(defaultValue);
+        } else {
+            mValue.setText("");
+        }
+
+        final DecimalPicker decimalPicker = new DecimalPicker(context, attrs);
+
+        LinearLayout layout = (LinearLayout) findViewById(R.id.title_spinner);
+        layout.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder alert = new AlertDialog.Builder(context);
+
+                alert.setTitle(mTitle.getText());
+
+
+                decimalPicker.setValue(SafeParse.parseDouble(
+                        mValue.getText().toString(), 0));
+
+                final LinearLayout layout = createLayout(context);
+                layout.addView(decimalPicker);
+                alert.setView(layout);
+                alert.setPositiveButton(getResources().getString(R.string.OK), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        setValue(getValue(decimalPicker));
+                        dialog.dismiss();
+                        layout.removeView(decimalPicker);
+                        onClose(true);
+                    }
+
+                    private String getValue(DecimalPicker dp) {
+                        return Double.toString(dp.getValue());
+                    }
+                });
+                alert.setNegativeButton(getResources().getString(R.string.Cancel), new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int whichButton) {
+                        dialog.dismiss();
+                        layout.removeView(decimalPicker);
+                        onClose(false);
+                    }
+                });
+                AlertDialog dialog = alert.create();
+                dialog.show();
+            }
+        });
+    }
+
+
     public void setAdapter(SpinnerAdapter adapter) {
         mSpinner.setAdapter(adapter);
         loadValue(null);
@@ -749,6 +800,9 @@ public class TitleSpinner extends LinearLayout {
         String name = "";
         if (mSpinner.getAdapter() != null) {
             name = nameById(mSpinner.getAdapter(), value);
+        }
+        setValue(name);
+    }
 
     public void setValueDate(Date d) { mValueDate = d; }
 
