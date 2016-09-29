@@ -61,6 +61,11 @@ import org.runnerup.common.tracker.TrackerState;
 import org.runnerup.common.util.Constants;
 import org.runnerup.common.util.Constants.DB;
 import org.runnerup.db.DBHelper;
+
+import org.runnerup.db.entities.AbstractTypeEntity;
+
+import org.runnerup.db.entities.SportEntity;
+
 import org.runnerup.hr.MockHRProvider;
 import org.runnerup.notification.GpsBoundState;
 import org.runnerup.notification.GpsSearchingState;
@@ -1126,4 +1131,19 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
             StartActivity.this.startActivityForResult(intent, 0);
         }
     };
+
+
+    private void loadSports() {
+        List<AbstractTypeEntity> types = SportEntity.getAll(mDB);
+
+        // Creating adapter for spinner
+        NameIdAdapter dataAdapter = new NameIdAdapter(this,android.R.layout.simple_spinner_item, types.toArray(new AbstractTypeEntity[types.size()]));
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        manualSport.setAdapter(dataAdapter);
+    }
+
 }
