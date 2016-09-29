@@ -68,7 +68,7 @@ import java.util.List;
 public class DBHelper extends SQLiteOpenHelper implements
         Constants {
 
-    private static final int DBVERSION = 31;
+    private static final int DBVERSION = 32;
     private static final String DBNAME = "runnerup.db";
 
     //DBVERSION update
@@ -270,9 +270,18 @@ public class DBHelper extends SQLiteOpenHelper implements
         arg0.execSQL(CREATE_TABLE_FEED);
         arg0.execSQL(CREATE_INDEX_FEED);
 
+        arg0.execSQL(CREATE_TABLE_SPORT);
+        arg0.execSQL(CREATE_TABLE_CALORIES);
+
+
         onCreateUpgrade(arg0, 0, DBVERSION);
+        initSports(arg0);
+
     }
 
+    private void initSports(SQLiteDatabase db) {
+        executeScript(db, "bundled/sports_init.sql");
+    }
 
     private void executeScript(SQLiteDatabase db, String file) {
         try {
@@ -289,6 +298,7 @@ public class DBHelper extends SQLiteOpenHelper implements
         }
         Log.i("SQL Script", "script executed");
     }
+
 
     @Override
     public void onUpgrade(SQLiteDatabase arg0, int oldVersion, int newVersion) {
@@ -372,6 +382,14 @@ public class DBHelper extends SQLiteOpenHelper implements
                     + " real");
             echoDo(arg0, "alter table " + DB.ACTIVITY.TABLE + " add column " + DB.ACTIVITY.META_DATA
                     + " text");
+        }
+
+        if (oldVersion < 32) {
+            arg0.execSQL(CREATE_TABLE_SPORT);
+            arg0.execSQL(CREATE_TABLE_CALORIES);
+
+
+            initSports(arg0);
         }
 
         //DBVERSION update
