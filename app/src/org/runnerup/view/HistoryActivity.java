@@ -41,6 +41,7 @@ import org.runnerup.common.util.Constants;
 import org.runnerup.db.ActivityCleaner;
 import org.runnerup.db.DBHelper;
 import org.runnerup.db.entities.ActivityEntity;
+import org.runnerup.db.entities.SportEntity;
 import org.runnerup.util.Formatter;
 import org.runnerup.util.SimpleCursorLoader;
 import org.runnerup.workout.Sport;
@@ -144,6 +145,8 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
             Float d = ae.getDistance();
             Long t = ae.getTime();
             Integer s = ae.getSport();
+            SportEntity se = new SportEntity();
+            se.readByPrimaryKey(mDB, s);
 
             {
                 TextView tv = (TextView) view.findViewById(to[0]);
@@ -189,10 +192,15 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
             {
                 TextView tv = (TextView) view.findViewById(to[5]);
 
-                if (s != null) {
-                    tv.setText(Sport.textOf(getResources(), s));
+//                if (s != null) {
+//                    tv.setText(Sport.textOf(getResources(), s));
+//                } else {
+//                    tv.setText(Sport.textOf(getResources(), DB.ACTIVITY.SPORT_RUNNING));
+//                }
+                if (se != null){
+                    tv.setText(se.getName());
                 } else {
-                    tv.setText(Sport.textOf(getResources(), DB.ACTIVITY.SPORT_RUNNING));
+                    tv.setText("Unknown");
                 }
             }
         }
