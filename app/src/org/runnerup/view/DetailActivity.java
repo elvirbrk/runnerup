@@ -58,6 +58,8 @@ import org.runnerup.common.util.Constants;
 import org.runnerup.content.ActivityProvider;
 import org.runnerup.db.ActivityCleaner;
 import org.runnerup.db.DBHelper;
+import org.runnerup.db.entities.AbstractTypeEntity;
+import org.runnerup.db.entities.SportEntity;
 import org.runnerup.export.SyncManager;
 import org.runnerup.export.Synchronizer;
 import org.runnerup.export.Synchronizer.Feature;
@@ -65,6 +67,7 @@ import org.runnerup.util.Bitfield;
 import org.runnerup.util.Formatter;
 import org.runnerup.util.GraphWrapper;
 import org.runnerup.util.MapWrapper;
+import org.runnerup.widget.NameIdAdapter;
 import org.runnerup.widget.TitleSpinner;
 import org.runnerup.widget.WidgetUtil;
 import org.runnerup.workout.Intensity;
@@ -72,6 +75,7 @@ import org.runnerup.workout.Intensity;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
@@ -168,6 +172,7 @@ public class DetailActivity extends AppCompatActivity implements Constants {
             setEdit(false);
         }
 
+        loadSports();
         fillHeaderData();
         requery();
         uploadButton.setVisibility(View.GONE);
@@ -217,6 +222,8 @@ public class DetailActivity extends AppCompatActivity implements Constants {
             adapters.add(adapter);
             lv.setAdapter(adapter);
         }
+
+
     }
 
     private void setEdit(boolean value) {
@@ -445,7 +452,7 @@ public class DetailActivity extends AppCompatActivity implements Constants {
         }
 
         if (tmp.containsKey(DB.ACTIVITY.SPORT)) {
-            sport.setValue(tmp.getAsInteger(DB.ACTIVITY.SPORT));
+            sport.setValueId(tmp.getAsInteger(DB.ACTIVITY.SPORT).longValue());
         }
     }
 
@@ -651,7 +658,7 @@ public class DetailActivity extends AppCompatActivity implements Constants {
     private void saveActivity() {
         ContentValues tmp = new ContentValues();
         tmp.put(DB.ACTIVITY.COMMENT, notes.getText().toString());
-        tmp.put(DB.ACTIVITY.SPORT, sport.getValueInt());
+        tmp.put(DB.ACTIVITY.SPORT, sport.getValueId());
         String whereArgs[] = {
                 Long.toString(mID)
         };
@@ -886,5 +893,18 @@ public class DetailActivity extends AppCompatActivity implements Constants {
             }
         });
         builder.show();
+    }
+
+    private void loadSports() {
+        List<AbstractTypeEntity> types = SportEntity.getAll(mDB);
+
+        // Creating adapter for spinner
+        NameIdAdapter dataAdapter = new NameIdAdapter(this,android.R.layout.simple_spinner_item, types.toArray(new AbstractTypeEntity[types.size()]));
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        sport.setAdapter(dataAdapter);
     }
 }

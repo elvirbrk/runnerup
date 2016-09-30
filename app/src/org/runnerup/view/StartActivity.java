@@ -311,6 +311,10 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         }
 
         updateTargetView();
+
+
+        loadSports();
+
     }
 
     @Override
@@ -1074,7 +1078,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         @Override
         public void onClick(View v) {
             ContentValues save = new ContentValues();
-            int sport = manualSport.getValueInt();
+            int sport = manualSport.getValueId().intValue();
             CharSequence date = manualDate.getValue();
             CharSequence time = manualTime.getValue();
             CharSequence distance = manualDistance.getValue();
@@ -1132,7 +1136,6 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         }
     };
 
-
     private void loadSports() {
         List<AbstractTypeEntity> types = SportEntity.getAll(mDB);
 
@@ -1145,5 +1148,6 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         // attaching data adapter to spinner
         manualSport.setAdapter(dataAdapter);
     }
+
 
 }
