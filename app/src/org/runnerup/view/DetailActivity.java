@@ -108,6 +108,7 @@ public class DetailActivity extends AppCompatActivity implements Constants {
     private TextView activityTime = null;
     private TextView activityPace = null;
     private TextView activityDistance = null;
+    private TextView activityCalories = null;
 
     private TitleSpinner sport = null;
     private EditText notes = null;
@@ -152,6 +153,7 @@ public class DetailActivity extends AppCompatActivity implements Constants {
         uploadButton = (Button) findViewById(R.id.upload_button);
         activityTime = (TextView) findViewById(R.id.activity_time);
         activityDistance = (TextView) findViewById(R.id.activity_distance);
+        activityCalories = (TextView) findViewById(R.id.activity_calories);
         activityPace = (TextView) findViewById(R.id.activity_pace);
         sport = (TitleSpinner) findViewById(R.id.summary_sport);
         notes = (EditText) findViewById(R.id.notes_text);
@@ -412,7 +414,7 @@ public class DetailActivity extends AppCompatActivity implements Constants {
         String[] from = new String[]{
                 DB.ACTIVITY.START_TIME,
                 DB.ACTIVITY.DISTANCE, DB.ACTIVITY.TIME, DB.ACTIVITY.COMMENT,
-                DB.ACTIVITY.SPORT
+                DB.ACTIVITY.SPORT, DB.ACTIVITY.CALORIES
         };
 
         Cursor c = mDB.query(DB.ACTIVITY.TABLE, from, "_id == " + mID, null,
@@ -431,6 +433,14 @@ public class DetailActivity extends AppCompatActivity implements Constants {
             activityDistance.setText(formatter.formatDistance(Formatter.Format.TXT_LONG, (long) d));
         } else {
             activityDistance.setText("");
+        }
+
+        String ca = "";
+        if (tmp.containsKey(DB.ACTIVITY.CALORIES)) {
+            ca = tmp.getAsString(DB.ACTIVITY.CALORIES);
+            activityCalories.setText(ca);
+        } else {
+            activityCalories.setText("");
         }
 
         float t = 0;

@@ -64,6 +64,7 @@ import org.runnerup.db.DBHelper;
 
 import org.runnerup.db.entities.AbstractTypeEntity;
 
+import org.runnerup.db.entities.CaloriesEntity;
 import org.runnerup.db.entities.SportEntity;
 
 import org.runnerup.hr.MockHRProvider;
@@ -78,6 +79,7 @@ import org.runnerup.tracker.component.TrackerWear;
 import org.runnerup.util.Formatter;
 import org.runnerup.util.SafeParse;
 import org.runnerup.util.TickListener;
+import org.runnerup.widget.NameIdAdapter;
 import org.runnerup.widget.TitleSpinner;
 import org.runnerup.widget.TitleSpinner.OnCloseDialogListener;
 import org.runnerup.widget.TitleSpinner.OnSetValueListener;
@@ -312,9 +314,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
         updateTargetView();
 
-
         loadSports();
-
     }
 
     @Override
@@ -1119,6 +1119,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
             save.put(DB.ACTIVITY.START_TIME, start_time);
 
             save.put(DB.ACTIVITY.SPORT, sport);
+            save.put(DB.ACTIVITY.CALORIES, CaloriesEntity.getCaloriesConsumption(mDB, sport, (int)(secs/60)));
             long id = mDB.insert(DB.ACTIVITY.TABLE, null, save);
 
             ContentValues lap = new ContentValues();
@@ -1148,6 +1149,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         // attaching data adapter to spinner
         manualSport.setAdapter(dataAdapter);
     }
+
 
 
 }

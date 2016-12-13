@@ -42,6 +42,12 @@
             android:text="@string/distance" />
 
         <TextView
+            android:id="@+id/total_calories"
+            style="@style/RunHeader"
+            android:gravity="right"
+            android:text="@string/calories" />
+
+        <TextView
             android:id="@+id/total_pace"
             style="@style/RunHeader"
             android:layout_marginRight="3dp"
@@ -81,6 +87,10 @@
 
             <TextView
                 android:id="@+id/activity_distance"
+                style="@style/RunInfo" />
+
+            <TextView
+                android:id="@+id/activity_calories"
                 style="@style/RunInfo" />
 
             <TextView

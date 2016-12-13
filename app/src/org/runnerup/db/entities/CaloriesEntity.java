@@ -133,7 +133,7 @@ public class CaloriesEntity extends AbstractEntity {
         return null;
     }
 
-    public int getCaloriesByWeightAndTime(int weight, int minutes){
+    private int getCaloriesByWeightAndTime(int weight, int minutes){
 
         double k = (double)(getCalories2()-getCalories1())/(getWeight2()-getWeight1());
 
@@ -144,6 +144,17 @@ public class CaloriesEntity extends AbstractEntity {
         double res = cal * minutes / 60;
 
         return (int)res;
+    }
+
+    public static int getCaloriesConsumption(SQLiteDatabase db, int sportId, int minutes){
+
+        CaloriesEntity ce = new CaloriesEntity();
+        ce.readByPrimaryKey(db, sportId);
+
+        //TODO ST: Get latest weight input
+        int w = 80;
+
+        return ce.getCaloriesByWeightAndTime(w, minutes);
     }
 
 
