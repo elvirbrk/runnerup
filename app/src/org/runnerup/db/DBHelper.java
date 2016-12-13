@@ -91,6 +91,7 @@ public class DBHelper extends SQLiteOpenHelper implements
             + (DB.ACTIVITY.MAX_HR + " integer, ")
             + (DB.ACTIVITY.AVG_CADENCE + " real, ")
             + (DB.ACTIVITY.META_DATA + " text, ")
+            + (DB.ACTIVITY.CALORIES + " integer, ")
             + ("deleted integer not null default 0, ")
             + "nullColumnHack text null"
             + ");";

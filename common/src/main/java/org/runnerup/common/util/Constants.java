@@ -42,6 +42,7 @@ public interface Constants {
             public static final String MAX_HR = "avg_hr";
             public static final String AVG_HR = "max_hr";
             public static final String AVG_CADENCE = "avg_cadence";
+            public static final String CALORIES = "calories";
             public static final String META_DATA = "meta_data";
             public static final String DELETED = "deleted";
             public static final String NULLCOLUMNHACK = "nullColumnHack";
@@ -73,6 +74,7 @@ public interface Constants {
             public static final String DELETED = "deleted";
             public static final String NULLCOLUMNHACK = "nullColumnHack";
         }
+
 
         public interface LOCATION {
             public static final String TABLE = "location";
