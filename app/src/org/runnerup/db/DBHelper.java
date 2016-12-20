@@ -275,6 +275,15 @@ public class DBHelper extends SQLiteOpenHelper implements
             + ("deleted integer not null default 0, ")
             + "nullColumnHack text null" + ");";
 
+    private static final String CREATE_TABLE_LAST_VALUES = "create table "
+            + DB.LAST_VALUES.TABLE + " ( "
+            + ("_id integer primary key autoincrement, ")
+            + (DB.LAST_VALUES.TAB_NAME + " text,")
+            + (DB.LAST_VALUES.FIELD + " text, ")
+            + (DB.LAST_VALUES.VALUE + " text, ")
+            + ("deleted integer not null default 0, ")
+            + "nullColumnHack text null" + ");";
+
     private static DBHelper sInstance = null;
     private Context mContext;
 
@@ -336,7 +345,7 @@ public class DBHelper extends SQLiteOpenHelper implements
         arg0.execSQL(CREATE_TABLE_UNITS);
         arg0.execSQL(CREATE_TABLE_HEALTH_ENTRY);
         arg0.execSQL(CREATE_TABLE_HEALTH_VALUES);
-
+		arg0.execSQL(CREATE_TABLE_LAST_VALUES);
         arg0.execSQL(CREATE_TABLE_SPORT);
         arg0.execSQL(CREATE_TABLE_CALORIES);
         arg0.execSQL(CREATE_TABLE_SPORT_INTENSITY);
@@ -488,6 +497,8 @@ public class DBHelper extends SQLiteOpenHelper implements
             echoDo(arg0, "update " + DB.ACTIVITY.TABLE + " set " +DB.ACTIVITY.SPORT+
                     " = ( select "+ DB.SPORT_INTENSITY.SPORT_ID + " from "  + DB.SPORT_INTENSITY.TABLE + " si where si._id = "+
                     DB.ACTIVITY.INTENSITY + ")");
+
+            arg0.execSQL(CREATE_TABLE_LAST_VALUES);
          }
 
 

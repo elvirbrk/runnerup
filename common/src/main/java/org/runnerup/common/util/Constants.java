@@ -140,6 +140,15 @@ public interface Constants {
             public static final String NULLCOLUMNHACK = "nullColumnHack";
         }
 
+        public interface LAST_VALUES {
+            public static final String TABLE = "last_values";
+            public static final String TAB_NAME = "tab_name";
+            public static final String FIELD = "field";
+            public static final String VALUE = "value";
+            public static final String DELETED = "deleted";
+            public static final String NULLCOLUMNHACK = "nullColumnHack";
+        }
+
 
         public interface LOCATION {
             public static final String TABLE = "location";
