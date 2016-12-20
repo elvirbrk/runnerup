@@ -372,6 +372,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
         loadManualSports();
         loadBasicSports();
+
     }
 
 
@@ -715,6 +716,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
             gpsInfoLayout.setVisibility(View.GONE);
             startButton.setEnabled(manualSetValue);
             startButton.setText(getString(R.string.Save_activity));
+
             return;
         } else if (tabHost.getCurrentTabTag().contentEquals(TAB_HEALTH)) {
             gpsInfoLayout.setVisibility(View.GONE);
@@ -802,6 +804,26 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
             wearLayout.setVisibility(View.GONE);
         else
             wearLayout.setVisibility(View.VISIBLE);
+    }
+
+    private void loadLastSportValue(String sport) {
+        LastValueEntity lv = new LastValueEntity();
+        lv.readByTabAndField(mDB, sport, "Intensity");
+        if (lv.getId() != null && lv.getId() > 0) {
+            manualSportIntensity.setValueId(Long.valueOf(lv.getValue()));
+        }
+
+        lv = new LastValueEntity();
+        lv.readByTabAndField(mDB, sport, "Duration");
+        if (lv.getId() != null && lv.getId() > 0) {
+            manualDuration.setValue(lv.getValue());
+        }
+
+        lv = new LastValueEntity();
+        lv.readByTabAndField(mDB, sport, "Distance");
+        if (lv.getId() != null && lv.getId() > 0) {
+            manualDistance.setValue(lv.getValue());
+        }
     }
 
     @Override
@@ -1217,6 +1239,21 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
             lap.put(DB.LAP.DISTANCE, dist);
             mDB.insert(DB.LAP.TABLE, null, lap);
 
+            LastValueEntity lv = new LastValueEntity();
+            lv.readByTabAndField(mDB, String.valueOf(sport), "Duration");
+            lv.setValue(duration.toString());
+            lv.insertOrUpdate(mDB);
+
+            lv = new LastValueEntity();
+            lv.readByTabAndField(mDB, String.valueOf(sport), "Distance");
+            lv.setValue(distance.toString());
+            lv.insertOrUpdate(mDB);
+
+            lv = new LastValueEntity();
+            lv.readByTabAndField(mDB, String.valueOf(sport), "Intensity");
+            lv.setValue(String.valueOf(intensity));
+            lv.insertOrUpdate(mDB);
+
             Intent intent = new Intent(StartActivity.this, DetailActivity.class);
             intent.putExtra("mode", "save");
             intent.putExtra("ID", id);
@@ -1497,6 +1534,8 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
 
             loadSportIntensity(pos);
+
+            loadLastSportValue(manualSport.getValueId().toString());
 
         }
 
