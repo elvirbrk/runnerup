@@ -76,6 +76,7 @@ import org.runnerup.db.entities.HealthEntryEntity;
 import org.runnerup.db.entities.HealthTypeEntity;
 import org.runnerup.db.entities.HealthValueEntity;
 import org.runnerup.db.entities.HealthValueTypeEntity;
+import org.runnerup.db.entities.LastValueEntity;
 import org.runnerup.db.entities.UnitEntity;
 
 
@@ -1297,6 +1298,11 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
             hv.insert(mDB);
             entry.addValue(hv);
+
+            LastValueEntity lv = new LastValueEntity();
+            lv.readByTabAndField(mDB, TAB_HEALTH, hvh.getHVT().getName());
+            lv.setValue(hvh.getValue().getValue().toString());
+            lv.insertOrUpdate(mDB);
         }
 
         Toast.makeText(this, "Health value saved.", Toast.LENGTH_SHORT).show();
@@ -1363,6 +1369,13 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         nValue.setOnSetValueListener(onSetValueManual);
         nValue.setTitle(hvt.getName());
         nValue.setLayoutParams(lpv);
+
+        LastValueEntity lv = new LastValueEntity();
+        lv.readByTabAndField(mDB, TAB_HEALTH, hvt.getName());
+        if (lv.getId() != null && lv.getId() > 0) {
+            nValue.setValue(lv.getValue());
+        }
+
         lLay.addView(nValue);
 
 //        LinearLayout.LayoutParams lpu = new LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, LinearLayout.LayoutParams.WRAP_CONTENT);
