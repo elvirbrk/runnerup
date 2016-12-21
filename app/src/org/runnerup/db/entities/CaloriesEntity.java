@@ -133,7 +133,7 @@ public class CaloriesEntity extends AbstractEntity {
         return null;
     }
 
-    private int getCaloriesByWeightAndTime(int weight, int minutes){
+    private int getCaloriesByWeightAndTime(Float weight, int minutes){
 
         double k = (double)(getCalories2()-getCalories1())/(getWeight2()-getWeight1());
 
@@ -150,9 +150,14 @@ public class CaloriesEntity extends AbstractEntity {
 
         CaloriesEntity ce = new CaloriesEntity();
         ce.readByPrimaryKey(db, sportId);
+        Float w = (float)80;
 
-        //TODO ST: Get latest weight input
-        int w = 80;
+        LastValueEntity lv = new LastValueEntity();
+        lv.readByTabAndField(db, "health", "Weight");
+        if (lv.getId() != null && lv.getId() > 0) {
+            w = Float.parseFloat(lv.getValue());
+        }
+
 
         return ce.getCaloriesByWeightAndTime(w, minutes);
     }
