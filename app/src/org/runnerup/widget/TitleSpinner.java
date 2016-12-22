@@ -424,7 +424,7 @@ public class TitleSpinner extends LinearLayout {
 
                     private String getValue(TimePicker dp) {
                         Calendar c = Calendar.getInstance();
-                        c.set(Calendar.HOUR, dp.getCurrentHour());
+                        c.set(Calendar.HOUR_OF_DAY, dp.getCurrentHour());
                         c.set(Calendar.MINUTE, dp.getCurrentMinute());
                         DateFormat df = android.text.format.DateFormat.getTimeFormat(context);
                         return df.format(c.getTime());
