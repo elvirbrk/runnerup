@@ -253,7 +253,7 @@
   <string name="Manual">Manual</string>
   <string name="Health">Health</string>
   <string name="Health_Type">Health Type</string>
-  <string name="Health_Value">Value</string>
+  <string name="Health_Value">Health Value</string>
   <string name="Health_Value_Type">Health Value Type</string>
   <string name="Health_Unit">Unit</string>
   <string name="Add_workout_notes">Add workout notes</string>

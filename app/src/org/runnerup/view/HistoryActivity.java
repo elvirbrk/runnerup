@@ -18,7 +18,9 @@
 package org.runnerup.view;
 
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -127,6 +129,8 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
         cursorAdapter = new HistoryListAdapter(this, null);
         listView.setAdapter(cursorAdapter);
 
+        listHealth.setOnItemLongClickListener(onItemLongClickListener);
+
         tabHost = (TabHost) findViewById(R.id.tabhost_history);
         tabHost.setup();
         TabHost.TabSpec tabSpec = tabHost.newTabSpec(TAB_WORKOUT);
@@ -218,6 +222,48 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
 
             //updateView();
         }
+    };
+
+    final ExpandableListView.OnItemLongClickListener onItemLongClickListener = new ExpandableListView.OnItemLongClickListener(){
+
+        @Override
+        public boolean onItemLongClick(final AdapterView<?> parent, View view, final int position, long id) {
+
+            AlertDialog.Builder builder = new AlertDialog.Builder(HistoryActivity.this);
+            builder.setTitle(getString(R.string.Health_Value));
+            builder.setMessage(getString(R.string.Delete));
+            builder.setPositiveButton(getString(R.string.Yes),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+
+                            HealthEntryEntity he = (HealthEntryEntity)parent.getItemAtPosition(position);
+
+                            DBHelper.deleteHealthEntry(mDB, he.getId());
+
+                            listAdapter._listEntry.remove(he);
+                            listAdapter.notifyDataSetChanged();
+
+                            dialog.dismiss();
+
+                        }
+                    });
+            builder.setNegativeButton(getString(R.string.No),
+                    new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // Do nothing but close the dialog
+                            dialog.dismiss();
+                        }
+
+                    });
+
+            builder.show();
+
+            return false;
+
+
+        }
+
+
     };
 
     private Date getPeriodStart() {
