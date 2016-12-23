@@ -639,6 +639,15 @@ public class DBHelper extends SQLiteOpenHelper implements
         db.delete(DB.ACTIVITY.TABLE, "_id = ?", args);
     }
 
+    public static void deleteHealthEntry(SQLiteDatabase db, long id) {
+        Log.e("DBHelper", "deleting health entry: " + id);
+        String args[] = {
+                Long.toString(id)
+        };
+        db.delete(DB.HEALTH_VALUES.TABLE, DB.HEALTH_VALUES.HEALTH_ENTRY + " = ?", args);
+        db.delete(DB.HEALTH_ENTRY.TABLE, "_id = ?", args);
+    }
+
     public static void purgeDeletedActivities(Context ctx, final ProgressDialog dialog,
                                               final Runnable onComplete) {
 
