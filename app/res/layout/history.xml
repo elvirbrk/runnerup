@@ -45,6 +45,7 @@
                 android:layout_below="@android:id/tabs" >
 
                 <include layout="@layout/history_workout" />
+                <include layout="@layout/history_sport_graph" />
                 <include layout="@layout/history_health" />
                 <include layout="@layout/history_graph" />
 

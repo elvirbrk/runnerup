@@ -73,6 +73,21 @@
         <item>Last year</item>
         <item>All</item>
     </string-array>
+
+  <string-array name="sportGraphEntries">
+    <item>Last week</item>
+    <item>Last month</item>
+    <item>Last 6 months</item>
+    <item>Last year</item>
+    <item>All</item>
+  </string-array>
+
+  <string-array name="sportGraphGroupBy">
+    <item>Day</item>
+    <item>Week</item>
+    <item>Month</item>
+    <item>Year</item>
+  </string-array>
   <string-array name="muteEntries">
     <item>No</item>
     <item>Yes</item>

@@ -19,6 +19,7 @@ package org.runnerup.view;
 
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -52,7 +53,9 @@ import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TextView;
 
+import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.helper.DateAsXAxisLabelFormatter;
+import com.jjoe64.graphview.series.BarGraphSeries;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.LineGraphSeries;
@@ -77,6 +80,7 @@ import org.runnerup.workout.Sport;
 import java.text.DateFormat;
 import java.text.FieldPosition;
 import java.text.ParsePosition;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
@@ -95,6 +99,7 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
     final static String TAB_WORKOUT = "workout";
     final static String TAB_HEALTH = "health";
     final static String TAB_GRAPH = "graph";
+    final static String TAB_SPORT_GRAPH = "sport_graph";
 
     SQLiteDatabase mDB = null;
     Formatter formatter = null;
@@ -102,10 +107,17 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
     ListView listView = null;
     ExpandableListView listHealth = null;
     LinearLayout graphLayout = null;
+    LinearLayout sportGraphLayout = null;
 
     CursorAdapter cursorAdapter = null;
     HistoryListHealthAdapter listAdapter = null;
     TitleSpinner graphPeriod = null;
+    TitleSpinner sportGraphPeriod = null;
+    TitleSpinner sportGraphGroupBy = null;
+
+    GraphView gvActiveTime = null;
+    GraphView gvDistance = null;
+    GraphView gvCalories = null;
 
     TabHost tabHost = null;
 
@@ -121,6 +133,7 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
         // get the listview
         listHealth = (ExpandableListView) findViewById(R.id.health_list);
         graphLayout = (LinearLayout) findViewById(R.id.history_graph);
+        sportGraphLayout = (LinearLayout) findViewById(R.id.history_sport_graph);
 
 
         mDB = DBHelper.getReadableDatabase(this);
@@ -139,6 +152,11 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
         tabSpec.setContent(R.id.tab_workout);
         tabHost.addTab(tabSpec);
 
+        tabSpec = tabHost.newTabSpec(TAB_SPORT_GRAPH);
+        tabSpec.setIndicator(WidgetUtil.createHoloTabIndicator(this, getString(R.string.sportGraph)));
+        tabSpec.setContent(R.id.tab_sport_graph);
+        tabHost.addTab(tabSpec);
+
         tabSpec = tabHost.newTabSpec(TAB_HEALTH);
         tabSpec.setIndicator(WidgetUtil.createHoloTabIndicator(this, getString(R.string.health)));
         tabSpec.setContent(R.id.tab_health);
@@ -154,6 +172,16 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
 
         graphPeriod = (TitleSpinner) findViewById(R.id.graph_period);
         graphPeriod.setOnSelectedListener(onSetGraphPeriod);
+
+        sportGraphPeriod = (TitleSpinner) findViewById(R.id.sport_graph_period);
+        sportGraphPeriod.setOnSelectedListener(onSetSportGraphPeriod);
+
+        sportGraphGroupBy = (TitleSpinner) findViewById(R.id.sport_graph_groupby);
+        sportGraphGroupBy.setOnSelectedListener(onSetSportGraphGroupBy);
+
+        gvActiveTime = (GraphView) findViewById(R.id.sport_graph_time);
+        gvDistance = (GraphView) findViewById(R.id.sport_graph_distance);
+        gvCalories = (GraphView) findViewById(R.id.sport_graph_calories);
 
         this.getSupportLoaderManager().initLoader(0, null, this);
 
@@ -219,6 +247,8 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
                 listHealth.setAdapter(prepareHealthData());
             } else if (tabId.contentEquals(TAB_GRAPH)) {
                 loadGraph(getPeriodStart());
+            } else if (tabId.contentEquals(TAB_SPORT_GRAPH)) {
+                loadSportGraph(getSportPeriodStart(), getSportGroupBy());
             }
 
             //updateView();
@@ -288,9 +318,54 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
         }
 
         return c.getTime();
-    }
+    };
 
-    ;
+    private Date getSportPeriodStart() {
+        String per = sportGraphPeriod.getValue().toString();
+        Calendar c = Calendar.getInstance();
+        switch (per) {
+            case "Last week":
+                c.add(Calendar.DATE, -7);
+                break;
+            case "Last month":
+                c.add(Calendar.MONTH, -1);
+                break;
+            case "Last 6 months":
+                c.add(Calendar.MONTH, -6);
+                break;
+            case "Last year":
+                c.add(Calendar.YEAR, -1);
+                break;
+            case "All":
+                return null;
+        }
+
+        return c.getTime();
+    };
+
+    private String getSportGroupBy() {
+        String per = sportGraphGroupBy.getValue().toString();
+        String s = "";
+        //TODO ST: Add group by strings
+        switch (per) {
+            case "Day":
+                s = "";
+                break;
+            case "Week":
+                s = "";
+                break;
+            case "Month":
+                s = "";
+                break;
+            case "Year":
+                s = "";
+                break;
+            default:
+                return null;
+        }
+
+        return s;
+    };
 
     private void loadGraph(Date startDate) {
 
@@ -393,6 +468,165 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
 
     }
 
+    private void loadSportGraph(Date startDate, String groupBy) {
+
+        String[] from = new String[]{
+                "_id", DB.ACTIVITY.START_TIME,
+                DB.ACTIVITY.DISTANCE, DB.ACTIVITY.TIME, DB.ACTIVITY.SPORT, DB.ACTIVITY.CALORIES};
+
+        String where = startDate == null ? "1" : String.valueOf(startDate.getTime()/1000);
+
+        //TODO ST: Sum columns
+        Cursor cursor = mDB.query(DB.ACTIVITY.TABLE, from, "deleted == 0 and "+ DB.ACTIVITY.START_TIME +
+                " >= ? ", new String[]{where}, groupBy, null, DB.ACTIVITY.START_TIME );
+
+        List<DataPoint> gdTime = new ArrayList<>();
+        List<DataPoint> gdDistance = new ArrayList<>();
+        List<DataPoint> gdCalories = new ArrayList<>();
+
+        gvActiveTime.removeAllSeries();
+        gvDistance.removeAllSeries();
+        gvCalories.removeAllSeries();
+
+
+        if (cursor.moveToFirst()){
+            while(!cursor.isAfterLast()){
+
+                ContentValues tmp = DBHelper.get(cursor);
+
+                long st = 0;
+                if (tmp.containsKey(DB.ACTIVITY.START_TIME)) {
+                    st = tmp.getAsLong(DB.ACTIVITY.START_TIME);
+                }
+                float d = 0;
+                if (tmp.containsKey(DB.ACTIVITY.DISTANCE)) {
+                    d = tmp.getAsFloat(DB.ACTIVITY.DISTANCE);
+                    gdDistance.add(new DataPoint(new Date(st*1000), d));
+                }
+
+                Integer ca = 0;
+                if (tmp.containsKey(DB.ACTIVITY.CALORIES)) {
+                    ca = tmp.getAsInteger(DB.ACTIVITY.CALORIES);
+                    gdCalories.add(new DataPoint(new Date(st*1000), ca));
+
+                }
+
+                float t = 0;
+                if (tmp.containsKey(DB.ACTIVITY.TIME)) {
+                    t = tmp.getAsFloat(DB.ACTIVITY.TIME);
+                    gdTime.add(new DataPoint(new Date(st*1000), (int)t/60));
+                }
+
+                cursor.moveToNext();
+            }
+        }
+        cursor.close();
+
+        //TODO ST: Different format for diffrerent group by
+        DateFormat df = new SimpleDateFormat("dd/MM");
+
+        ///Active time
+        BarGraphSeries timeSeries = new BarGraphSeries<DataPoint>(gdTime.toArray(new DataPoint[gdTime.size()]));
+        gvActiveTime.addSeries(timeSeries);
+        timeSeries.setColor(Color.GREEN);
+
+        timeSeries.setSpacing(50);
+
+        // draw values on top
+//        timeSeries.setDrawValuesOnTop(true);
+//        timeSeries.setValuesOnTopColor(Color.RED);
+        //series.setValuesOnTopSize(50);
+
+
+
+        // set date label formatter
+        gvActiveTime.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(this, df));
+        gvActiveTime.getGridLabelRenderer().setNumHorizontalLabels(4); // only 4 because of the space
+//        gvActiveTime.getGridLabelRenderer().setNumVerticalLabels(3);
+        //gvActiveTime.getGridLabelRenderer().setGridStyle(GridLabelRenderer.GridStyle.NONE);
+
+        // set manual x bounds to have nice steps
+        if (startDate != null) {
+            gvActiveTime.getViewport().setMinX(startDate.getTime());
+            gvActiveTime.getViewport().setMaxX((new Date()).getTime());
+            gvActiveTime.getViewport().setXAxisBoundsManual(true);
+        }
+
+        gvActiveTime.getViewport().setMinY(0);
+//        gvActiveTime.getViewport().setYAxisBoundsManual(true);
+//        //gvActiveTime.getViewport().setMaxY(120);
+
+//        gvActiveTime.getGridLabelRenderer().setHumanRounding(false);
+
+
+
+
+        /// Distance
+        BarGraphSeries distanceSeries = new BarGraphSeries<DataPoint>(gdDistance.toArray(new DataPoint[gdDistance.size()]));
+        gvDistance.addSeries(distanceSeries);
+        distanceSeries.setColor(Color.GREEN);
+
+        distanceSeries.setSpacing(50);
+
+        // draw values on top
+        //distanceSeries.setDrawValuesOnTop(true);
+        //distanceSeries.setValuesOnTopColor(Color.RED);
+//        series.setValuesOnTopSize(50);
+
+
+
+        // set date label formatter
+        gvDistance.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(this, df));
+        gvDistance.getGridLabelRenderer().setNumHorizontalLabels(4); // only 4 because of the space
+
+        // set manual x bounds to have nice steps
+        if (startDate != null) {
+            gvDistance.getViewport().setMinX(startDate.getTime());
+            gvDistance.getViewport().setMaxX((new Date()).getTime());
+            gvDistance.getViewport().setXAxisBoundsManual(true);
+        }
+
+        gvDistance.getViewport().setMinY(0);
+//        gvDistance.getViewport().setMaxY(100);
+//
+//        gvDistance.getGridLabelRenderer().setHumanRounding(false);
+
+        ///Calories
+        BarGraphSeries caloriesSeries = new BarGraphSeries<DataPoint>(gdCalories.toArray(new DataPoint[gdCalories.size()]));
+        gvCalories.addSeries(caloriesSeries);
+
+        caloriesSeries.setColor(Color.GREEN);
+        caloriesSeries.setSpacing(50);
+
+        // draw values on top
+//        caloriesSeries.setDrawValuesOnTop(true);
+//        caloriesSeries.setValuesOnTopColor(Color.RED);
+//        series.setValuesOnTopSize(50);
+
+        // set date label formatter
+        gvCalories.getGridLabelRenderer().setLabelFormatter(new DateAsXAxisLabelFormatter(this, df));
+        gvCalories.getGridLabelRenderer().setNumHorizontalLabels(4); // only 4 because of the space
+//        gvCalories.getGridLabelRenderer().setNumVerticalLabels(5);
+//
+//        gvCalories.getGridLabelRenderer().setGridStyle(GridLabelRenderer.GridStyle.NONE);
+//
+        // set manual x bounds to have nice steps
+        if (startDate != null) {
+            gvCalories.getViewport().setMinX(startDate.getTime());
+            gvCalories.getViewport().setMaxX((new Date()).getTime());
+            gvCalories.getViewport().setXAxisBoundsManual(true);
+        }
+
+        gvCalories.getViewport().setMinY(0);
+//        gvCalories.getViewport().setMaxY(1000);
+//
+//        gvCalories.getGridLabelRenderer().setHumanRounding(false);
+
+
+
+    }
+
+
     final TitleSpinner.OnSelectedListener onSetGraphPeriod = new TitleSpinner.OnSelectedListener() {
 
         @Override
@@ -403,6 +637,28 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
 
 
             loadGraph(getPeriodStart());
+
+        }
+
+    };
+
+    final TitleSpinner.OnSelectedListener onSetSportGraphPeriod = new TitleSpinner.OnSelectedListener() {
+
+        @Override
+        public void onSelected(Spinner spiner, int newValue) throws IllegalArgumentException {
+
+            loadSportGraph(getSportPeriodStart(), getSportGroupBy());
+
+        }
+
+    };
+
+    final TitleSpinner.OnSelectedListener onSetSportGraphGroupBy = new TitleSpinner.OnSelectedListener() {
+
+        @Override
+        public void onSelected(Spinner spiner, int newValue) throws IllegalArgumentException {
+
+            loadSportGraph(getSportPeriodStart(), getSportGroupBy());
 
         }
 

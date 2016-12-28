@@ -47,6 +47,7 @@
   <string name="speed">speed</string>
   <string name="pace">pace</string>
   <string name="calories">calories</string>
+  <string name="Calories">Calories</string>
   <string name="heart_rate_zone">heart rate zone</string>
   <string name="cadence">cadence</string>
   <string name="temperature">temperature</string>
@@ -109,8 +110,12 @@
   <string name="Save_entry">Save entry</string>
   <string name="workout">Workout</string>
   <string name="health">Health</string>
-  <string name="graph">Graph</string>
+  <string name="graph">Health Graph</string>
+  <string name="sportGraph">Activity Graph</string>
   <string name="graphPeriod">Graph Period</string>
+  <string name="sportGraphPeriod">Graph Period</string>
+  <string name="sportGraphGroupBy">Group By</string>
+  <string name="activeTime">Active Time</string>
   <string name="Upload_activity">Upload activity</string>
   <string name="Uploaded">Uploaded</string>
   <string name="Finished">Finished</string>
