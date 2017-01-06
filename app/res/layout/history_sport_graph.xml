@@ -32,20 +32,17 @@
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:minHeight="200dp"
-            android:id="@+id/sport_graph_time"
-            android:title="@string/activeTime"/>
+            android:id="@+id/sport_graph_time"/>
         <com.jjoe64.graphview.GraphView xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:minHeight="200dp"
-            android:id="@+id/sport_graph_distance"
-            android:title="@string/Distance"/>
+            android:id="@+id/sport_graph_distance"/>
         <com.jjoe64.graphview.GraphView xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
             android:layout_height="200dp"
             android:minHeight="200dp"
-            android:id="@+id/sport_graph_calories"
-            android:title="@string/Calories"/>
+            android:id="@+id/sport_graph_calories"/>
         <org.runnerup.widget.TitleSpinner
             android:id="@+id/sport_graph_period"
             android:layout_width="match_parent"
