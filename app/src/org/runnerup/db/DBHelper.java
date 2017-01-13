@@ -92,6 +92,7 @@ public class DBHelper extends SQLiteOpenHelper implements
             + (DB.ACTIVITY.AVG_CADENCE + " real, ")
             + (DB.ACTIVITY.META_DATA + " text, ")
             + (DB.ACTIVITY.CALORIES + " integer, ")
+            + (DB.ACTIVITY.INTENSITY + " integer, ")
             + ("deleted integer not null default 0, ")
             + "nullColumnHack text null"
             + ");";
@@ -200,13 +201,25 @@ public class DBHelper extends SQLiteOpenHelper implements
             + ("_id integer primary key autoincrement, ")
             + (DB.SPORT.NAME + " text,")
             + (DB.SPORT.FAVORITE + " integer, ")
+            + (DB.SPORT.GPS + " integer, ")
+            + ("deleted integer not null default 0, ")
+            + "nullColumnHack text null" + ");";
+
+    private static final String CREATE_TABLE_SPORT_INTENSITY = "create table "
+            + DB.SPORT_INTENSITY.TABLE + " ( "
+            + ("_id integer primary key autoincrement, ")
+            + (DB.SPORT_INTENSITY.SPORT_ID + " integer,")
+            + (DB.SPORT_INTENSITY.NAME + " text,")
+            + (DB.SPORT_INTENSITY.FAVORITE + " integer, ")
+            + (DB.SPORT_INTENSITY.MIN_SPEED + " double, ")
+            + (DB.SPORT_INTENSITY.MAX_SPEED + " double, ")
             + ("deleted integer not null default 0, ")
             + "nullColumnHack text null" + ");";
 
     private static final String CREATE_TABLE_CALORIES = "create table "
             + DB.CALORIES.TABLE + " ( "
             + ("_id integer primary key autoincrement, ")
-            + (DB.CALORIES.SPORT_ID + " integer,")
+            + (DB.CALORIES.SPORT_INTENSITY_ID + " integer,")
             + (DB.CALORIES.WEIGHT1 + " integer, ")
             + (DB.CALORIES.WEIGHT2 + " integer, ")
             + (DB.CALORIES.CALORIES1 + " integer, ")
@@ -273,6 +286,7 @@ public class DBHelper extends SQLiteOpenHelper implements
 
         arg0.execSQL(CREATE_TABLE_SPORT);
         arg0.execSQL(CREATE_TABLE_CALORIES);
+        arg0.execSQL(CREATE_TABLE_SPORT_INTENSITY);
 
 
         onCreateUpgrade(arg0, 0, DBVERSION);
@@ -386,11 +400,25 @@ public class DBHelper extends SQLiteOpenHelper implements
         }
 
         if (oldVersion < 32) {
-            arg0.execSQL(CREATE_TABLE_SPORT);
-            arg0.execSQL(CREATE_TABLE_CALORIES);
+            echoDo(arg0, "alter table " + DB.SPORT.TABLE + " add column " + DB.SPORT.GPS
+                    + " integer");
 
+            echoDo(arg0, "alter table " + DB.ACTIVITY.TABLE + " add column " + DB.ACTIVITY.INTENSITY
+                    + " integer");
+
+            echoDo(arg0, "drop table " + DB.CALORIES.TABLE );
+
+            echoDo(arg0, "delete from " + DB.SPORT.TABLE );
+
+            arg0.execSQL(CREATE_TABLE_CALORIES);
+            arg0.execSQL(CREATE_TABLE_SPORT_INTENSITY);
 
             initSports(arg0);
+
+            echoDo(arg0, "update " + DB.ACTIVITY.TABLE + " set " +DB.ACTIVITY.INTENSITY+ " = "+ DB.ACTIVITY.SPORT );
+            echoDo(arg0, "update " + DB.ACTIVITY.TABLE + " set " +DB.ACTIVITY.SPORT+
+                    " = ( select "+ DB.SPORT_INTENSITY.SPORT_ID + " from "  + DB.SPORT_INTENSITY.TABLE + " si where si._id = "+
+                    DB.ACTIVITY.INTENSITY + ")");
         }
 
         //DBVERSION update

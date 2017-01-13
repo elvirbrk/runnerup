@@ -201,6 +201,17 @@ public class ActivityEntity extends AbstractEntity {
         return null;
     }
 
+    public void setSportIntensity(Integer value) {
+        values().put(Constants.DB.ACTIVITY.INTENSITY, value);
+    }
+
+    public Integer getSportIntensity() {
+        if (values().containsKey(Constants.DB.ACTIVITY.INTENSITY)) {
+            return values().getAsInteger(Constants.DB.ACTIVITY.INTENSITY);
+        }
+        return null;
+    }
+
     /**
      * Status of the activity
      */
