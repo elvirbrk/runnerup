@@ -47,6 +47,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TabHost.TabSpec;
 import android.widget.TextView;
@@ -59,7 +60,9 @@ import org.runnerup.content.ActivityProvider;
 import org.runnerup.db.ActivityCleaner;
 import org.runnerup.db.DBHelper;
 import org.runnerup.db.entities.AbstractTypeEntity;
+import org.runnerup.db.entities.CaloriesEntity;
 import org.runnerup.db.entities.SportEntity;
+import org.runnerup.db.entities.SportIntensityEntity;
 import org.runnerup.export.SyncManager;
 import org.runnerup.export.Synchronizer;
 import org.runnerup.export.Synchronizer.Feature;
@@ -111,6 +114,8 @@ public class DetailActivity extends AppCompatActivity implements Constants {
     private TextView activityCalories = null;
 
     private TitleSpinner sport = null;
+    private TitleSpinner sportIntensity = null;
+    private Long lastSport = null;
     private EditText notes = null;
     private MenuItem recomputeMenuItem = null;
 
@@ -118,6 +123,9 @@ public class DetailActivity extends AppCompatActivity implements Constants {
 
     private SyncManager syncManager = null;
     private Formatter formatter = null;
+
+    private float time = 0;
+    private int calories = 0;
 
     /**
      * Called when the activity is first created.
@@ -156,7 +164,10 @@ public class DetailActivity extends AppCompatActivity implements Constants {
         activityCalories = (TextView) findViewById(R.id.activity_calories);
         activityPace = (TextView) findViewById(R.id.activity_pace);
         sport = (TitleSpinner) findViewById(R.id.summary_sport);
+        sportIntensity = (TitleSpinner) findViewById(R.id.summary_sport_intensity);
         notes = (EditText) findViewById(R.id.notes_text);
+
+
 
         MapView mapView = (MapView) findViewById(R.id.mapview);
         mapWrapper = new MapWrapper(this, mDB, mID, formatter, mapView);
@@ -178,6 +189,9 @@ public class DetailActivity extends AppCompatActivity implements Constants {
         fillHeaderData();
         requery();
         uploadButton.setVisibility(View.GONE);
+
+        sport.setOnSelectedListener(onSetSport);
+        sportIntensity.setOnSelectedListener(onSetIntensity);
 
         TabHost th = (TabHost) findViewById(R.id.tabhost);
         th.setup();
@@ -233,6 +247,7 @@ public class DetailActivity extends AppCompatActivity implements Constants {
         saveButton.setEnabled(value);
         WidgetUtil.setEditable(notes, value);
         sport.setEnabled(value);
+        sportIntensity.setEnabled(value);
         if (recomputeMenuItem != null)
             recomputeMenuItem.setEnabled(value);
     }
@@ -414,7 +429,7 @@ public class DetailActivity extends AppCompatActivity implements Constants {
         String[] from = new String[]{
                 DB.ACTIVITY.START_TIME,
                 DB.ACTIVITY.DISTANCE, DB.ACTIVITY.TIME, DB.ACTIVITY.COMMENT,
-                DB.ACTIVITY.SPORT, DB.ACTIVITY.CALORIES
+                DB.ACTIVITY.SPORT, DB.ACTIVITY.CALORIES, DB.ACTIVITY.INTENSITY
         };
 
         Cursor c = mDB.query(DB.ACTIVITY.TABLE, from, "_id == " + mID, null,
@@ -435,24 +450,24 @@ public class DetailActivity extends AppCompatActivity implements Constants {
             activityDistance.setText("");
         }
 
-        String ca = "";
+        //String ca = "";
         if (tmp.containsKey(DB.ACTIVITY.CALORIES)) {
-            ca = tmp.getAsString(DB.ACTIVITY.CALORIES);
-            activityCalories.setText(ca);
+            calories = tmp.getAsInteger(DB.ACTIVITY.CALORIES);
+            activityCalories.setText(String.valueOf(calories));
         } else {
             activityCalories.setText("");
         }
 
-        float t = 0;
+        //float t = 0;
         if (tmp.containsKey(DB.ACTIVITY.TIME)) {
-            t = tmp.getAsFloat(DB.ACTIVITY.TIME);
-            activityTime.setText(formatter.formatElapsedTime(Formatter.Format.TXT_SHORT, (long) t));
+            time = tmp.getAsFloat(DB.ACTIVITY.TIME);
+            activityTime.setText(formatter.formatElapsedTime(Formatter.Format.TXT_SHORT, (long) time));
         } else {
             activityTime.setText("");
         }
 
-        if (d != 0 && t != 0) {
-            activityPace.setText(formatter.formatPace(Formatter.Format.TXT_LONG, t / d));
+        if (d != 0 && time != 0) {
+            activityPace.setText(formatter.formatPace(Formatter.Format.TXT_LONG, time / d));
         } else {
             activityPace.setText("");
         }
@@ -461,8 +476,26 @@ public class DetailActivity extends AppCompatActivity implements Constants {
             notes.setText(tmp.getAsString(DB.ACTIVITY.COMMENT));
         }
 
+        Integer sp = 0;
         if (tmp.containsKey(DB.ACTIVITY.SPORT)) {
-            sport.setValueId(tmp.getAsInteger(DB.ACTIVITY.SPORT).longValue());
+            sp = tmp.getAsInteger(DB.ACTIVITY.SPORT);
+            sport.setValueId(sp.longValue());
+
+            loadSportIntensity(sp.longValue());
+        }
+
+        if (tmp.containsKey(DB.ACTIVITY.INTENSITY) && !tmp.getAsString(DB.ACTIVITY.INTENSITY).equals("")) {
+
+            sportIntensity.setValueId(tmp.getAsInteger(DB.ACTIVITY.INTENSITY).longValue());
+
+        } else {
+
+            if(d != 0 && time != 0){
+                double speed_kmh = (d/1000)/(time/3600);
+                SportIntensityEntity sie = SportIntensityEntity.getBySpeed(mDB, sp, speed_kmh);
+                sportIntensity.setValueId(sie.getId());
+            }
+
         }
     }
 
@@ -669,6 +702,8 @@ public class DetailActivity extends AppCompatActivity implements Constants {
         ContentValues tmp = new ContentValues();
         tmp.put(DB.ACTIVITY.COMMENT, notes.getText().toString());
         tmp.put(DB.ACTIVITY.SPORT, sport.getValueId());
+        tmp.put(DB.ACTIVITY.INTENSITY, sportIntensity.getValueId());
+        tmp.put(DB.ACTIVITY.CALORIES, calories);
         String whereArgs[] = {
                 Long.toString(mID)
         };
@@ -917,4 +952,56 @@ public class DetailActivity extends AppCompatActivity implements Constants {
         // attaching data adapter to spinner
         sport.setAdapter(dataAdapter);
     }
+
+    final TitleSpinner.OnSelectedListener onSetSport = new TitleSpinner.OnSelectedListener() {
+
+        @Override
+        public void onSelected(Spinner spiner, int newValue) throws IllegalArgumentException {
+            Long pos = sport.getValueId();
+
+            //loadHealthValueTypes(pos);
+
+
+            loadSportIntensity(pos);
+
+        }
+
+    };
+
+    private void loadSportIntensity(Long pos) {
+
+        if(pos == lastSport){
+            return;
+        } else{
+            lastSport = pos;
+        }
+
+        SportEntity se = new SportEntity();
+        se.readByPrimaryKey(mDB, pos);
+
+        List<? extends  AbstractTypeEntity> intensities = se.getSportIntensities();
+
+        // Creating adapter for spinner
+        NameIdAdapter dataAdapter = new NameIdAdapter(this,android.R.layout.simple_spinner_item, intensities.toArray(new AbstractTypeEntity[intensities.size()]));
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        sportIntensity.setAdapter(dataAdapter);
+
+    }
+
+    final TitleSpinner.OnSelectedListener onSetIntensity = new TitleSpinner.OnSelectedListener() {
+
+        @Override
+        public void onSelected(Spinner spiner, int newValue) throws IllegalArgumentException {
+            int intensity = sportIntensity.getValueId().intValue();
+
+            calories = CaloriesEntity.getCaloriesConsumption(mDB, intensity, (int)(time/60));
+            activityCalories.setText(String.valueOf(calories));
+
+        }
+
+    };
 }

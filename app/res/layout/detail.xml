@@ -138,6 +138,15 @@
                         android:text="@string/Sport"
                         runnerup:type="spinner_txt_id"/>
 
+                    <org.runnerup.widget.TitleSpinner
+                        android:id="@+id/summary_sport_intensity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/manual_sport"
+                        android:prompt="@string/Type"
+                        android:text="@string/Intensity"
+                        runnerup:type="spinner_txt_id"/>
+
                     <EditText
                         android:id="@+id/notes_text"
                         android:layout_width="match_parent"

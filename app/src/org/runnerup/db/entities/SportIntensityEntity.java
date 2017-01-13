@@ -145,5 +145,18 @@ public class SportIntensityEntity extends AbstractTypeEntity {
         return list;
     }
 
+    public static SportIntensityEntity getBySpeed(SQLiteDatabase db, int sportId, double speed_kmh){
+        for (AbstractEntity a : getAll(db, new SportIntensityEntity())) {
+            SportIntensityEntity si = (SportIntensityEntity)a;
+            if (si.getSportId() == sportId && si.getMinSpeed() <= speed_kmh && speed_kmh < si.getMaxSpeed() )
+            {
+                return (SportIntensityEntity)a;
+            }
+
+        }
+
+        return null;
+    }
+
 
 }
