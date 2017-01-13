@@ -41,6 +41,7 @@ import java.util.List;
 @TargetApi(Build.VERSION_CODES.FROYO)
 public class SportEntity extends AbstractTypeEntity {
 
+    private List<SportIntensityEntity> values;
     public SportEntity() {
         super();
     }
@@ -76,12 +77,24 @@ public class SportEntity extends AbstractTypeEntity {
         return null;
     }
 
+    public void setGPS(Integer value) {
+        values().put(Constants.DB.SPORT.GPS, value);
+    }
+
+    public Integer getGPS() {
+        if (values().containsKey(Constants.DB.SPORT.GPS)) {
+            return values().getAsInteger(Constants.DB.SPORT.GPS);
+        }
+        return null;
+    }
+
     @Override
     protected List<String> getValidColumns() {
         List<String> columns = new ArrayList<String>();
         columns.add(Constants.DB.PRIMARY_KEY);
         columns.add(Constants.DB.SPORT.NAME);
         columns.add(Constants.DB.SPORT.FAVORITE);
+        columns.add(Constants.DB.SPORT.GPS);
 
         return columns;
     }
@@ -115,6 +128,38 @@ public class SportEntity extends AbstractTypeEntity {
         });
 
         return list;
+    }
+
+    public void addSportIntensity(SportIntensityEntity val) {
+        if (val.getSportId() != null && (this.getId() == null || !val.getSportId().equals(this.getId()))) {
+            throw new IllegalArgumentException("Foreign key of lap (" + val.getSportId() +
+                    ") doesn't match the activity primary key (" + this.getId() + ")");
+        }
+
+        if (val.getSportId() == null && this.getId() != null) {
+            val.setSportId(this.getId());
+        }
+
+        getSportIntensities().add(val);
+    }
+
+    public void addSportIntensities(List<SportIntensityEntity> vals) {
+        for (SportIntensityEntity v : vals) {
+            this.addSportIntensity(v);
+        }
+    }
+
+    public void putSportIntensity(List<SportIntensityEntity> vals) {
+        this.getSportIntensities().clear();
+        this.addSportIntensities(vals);
+    }
+
+    public List<SportIntensityEntity> getSportIntensities() {
+        if (values == null) {
+            values = SportIntensityEntity.getAll(db,getId().intValue());
+        }
+
+        return values;
     }
 
 

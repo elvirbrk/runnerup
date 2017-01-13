@@ -60,13 +60,25 @@ public interface Constants {
             public static final String TABLE = "sport";
             public static final String NAME = "name";
             public static final String FAVORITE = "favorite";
+            public static final String GPS = "favorite";
+            public static final String DELETED = "deleted";
+            public static final String NULLCOLUMNHACK = "nullColumnHack";
+        }
+
+        public interface SPORT_INTENSITY {
+            public static final String TABLE = "sport_intensity";
+            public static final String SPORT_ID = "sport_id";
+            public static final String NAME = "name";
+            public static final String FAVORITE = "favorite";
+            public static final String MIN_SPEED = "min_speed";
+            public static final String MAX_SPEED = "max_speed";
             public static final String DELETED = "deleted";
             public static final String NULLCOLUMNHACK = "nullColumnHack";
         }
 
         public interface CALORIES {
             public static final String TABLE = "calories";
-            public static final String SPORT_ID = "sport_id";
+            public static final String SPORT_INTENSITY_ID = "sport_intensity_id";
             public static final String WEIGHT1 = "weight1";
             public static final String WEIGHT2 = "weight2";
             public static final String CALORIES1 = "calories1";

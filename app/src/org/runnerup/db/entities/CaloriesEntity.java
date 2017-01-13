@@ -54,13 +54,13 @@ public class CaloriesEntity extends AbstractEntity {
     }
 
 
-    public void setSportId(Integer value) {
-        values().put(Constants.DB.CALORIES.SPORT_ID, value);
+    public void setSportIntensityId(Integer value) {
+        values().put(Constants.DB.CALORIES.SPORT_INTENSITY_ID, value);
     }
 
-    public Integer getSportId() {
-        if (values().containsKey(Constants.DB.CALORIES.SPORT_ID)) {
-            return values().getAsInteger(Constants.DB.CALORIES.SPORT_ID);
+    public Integer getSportIntensityId() {
+        if (values().containsKey(Constants.DB.CALORIES.SPORT_INTENSITY_ID)) {
+            return values().getAsInteger(Constants.DB.CALORIES.SPORT_INTENSITY_ID);
         }
         return null;
     }
@@ -114,7 +114,7 @@ public class CaloriesEntity extends AbstractEntity {
     protected List<String> getValidColumns() {
         List<String> columns = new ArrayList<String>();
         columns.add(Constants.DB.PRIMARY_KEY);
-        columns.add(Constants.DB.CALORIES.SPORT_ID);
+        columns.add(Constants.DB.CALORIES.SPORT_INTENSITY_ID);
         columns.add(Constants.DB.CALORIES.WEIGHT1);
         columns.add(Constants.DB.CALORIES.WEIGHT2);
         columns.add(Constants.DB.CALORIES.CALORIES1);
