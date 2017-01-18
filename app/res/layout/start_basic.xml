@@ -34,10 +34,10 @@
         android:id="@+id/basic_sport"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:entries="@array/sportEntries"
         android:key="@string/pref_basic_sport"
         android:prompt="@string/Type"
-        android:text="@string/Sport" />
+        android:text="@string/Sport"
+        runnerup:type="spinner_txt_id"/>
 
     <org.runnerup.widget.TitleSpinner
         android:key="@string/pref_basic_target_type"

@@ -131,6 +131,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
     TitleSpinner simpleAudioSpinner = null;
     AudioSchemeListAdapter simpleAudioListAdapter = null;
+    TitleSpinner simpleSport = null;
     TitleSpinner simpleTargetType = null;
     TitleSpinner simpleTargetPaceValue = null;
     TitleSpinner simpleTargetHrz = null;
@@ -235,6 +236,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         simpleAudioListAdapter.reload();
         simpleAudioSpinner = (TitleSpinner) findViewById(R.id.basic_audio_cue_spinner);
         simpleAudioSpinner.setAdapter(simpleAudioListAdapter);
+        simpleSport = (TitleSpinner) findViewById(R.id.basic_sport);
         simpleTargetType = (TitleSpinner) findViewById(R.id.tab_basic_target_type);
         simpleTargetPaceValue = (TitleSpinner) findViewById(R.id.tab_basic_target_pace_max);
         hrZonesAdapter = new HRZonesListAdapter(this, inflater);
@@ -321,7 +323,8 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
         updateTargetView();
 
-        loadSports();
+        loadManualSports();
+        loadBasicSports();
     }
 
     @Override
@@ -1145,8 +1148,8 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         }
     };
 
-    private void loadSports() {
-        List<AbstractTypeEntity> types = SportEntity.getAll(mDB);
+    private void loadSports(TitleSpinner ts, String column, String filter) {
+        List<AbstractTypeEntity> types = SportEntity.getAll(mDB, column, filter);
 
         // Creating adapter for spinner
         NameIdAdapter dataAdapter = new NameIdAdapter(this,android.R.layout.simple_spinner_item, types.toArray(new AbstractTypeEntity[types.size()]));
@@ -1155,7 +1158,15 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
         // attaching data adapter to spinner
-        manualSport.setAdapter(dataAdapter);
+        ts.setAdapter(dataAdapter);
+    }
+
+    private void loadManualSports() {
+        loadSports(manualSport, "1", "1");
+    }
+
+    private void loadBasicSports() {
+        loadSports(simpleSport, DB.SPORT.GPS, "1");
     }
 
     final OnSelectedListener onSetManualSport = new OnSelectedListener() {

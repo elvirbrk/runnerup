@@ -110,8 +110,12 @@ public class SportEntity extends AbstractTypeEntity {
     }
 
     public static List<AbstractTypeEntity> getAll(SQLiteDatabase db){
+        return getAll(db,"1", "1");
+    }
+
+    public static List<AbstractTypeEntity> getAll(SQLiteDatabase db, String column, String filter){
         List<AbstractTypeEntity> list = new ArrayList<AbstractTypeEntity>();
-        for (AbstractEntity a : getAll(db, new SportEntity())) {
+        for (AbstractEntity a : getAll(db, new SportEntity(), column, filter)) {
             list.add((SportEntity)a);
         }
 
