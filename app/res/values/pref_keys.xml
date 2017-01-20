@@ -77,6 +77,8 @@
     <string name="pref_basic_target_pace_min_range">basic_target_pace_min_range</string>
     <string name="pref_basic_target_hrz">basic_target_hrz</string>
 
+    <string name="pref_health_type">healthType</string>
+
     <string name="pref_interval_audio">intervalAudio</string>
     <string name="pref_interval_repetitions">intervalRepetitions</string>
     <string name="pref_interval_type">intervalType</string>
