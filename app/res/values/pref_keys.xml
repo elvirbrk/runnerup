@@ -87,6 +87,7 @@
     <string name="pref_interval_rest_distance">intervalRestDistance</string>
 
     <string name="pref_manual_sport">manualSport</string>
+    <string name="pref_manual_intensity">manualIntensity</string>
 
     <string name="pref_advanced_audio">advancedAudio</string>
     <string name="pref_advanced_workout">advancedWorkout</string>
