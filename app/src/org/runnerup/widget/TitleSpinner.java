@@ -669,9 +669,16 @@ public class TitleSpinner extends LinearLayout {
             case TS_NUMBERPICKER:
             case TS_DATEPICKER:
             case TS_TIMEPICKER:
-            case TS_SPINNER_TXT_ID:
+
                 final String val = pref.getString(mKey, defaultValue == null ? "" : defaultValue);
                 setValue(val);
+                break;
+            case TS_SPINNER_TXT_ID:
+                int defa = 0;
+                if (defaultValue != null) {
+                    def = SafeParse.parseInt(defaultValue, 0);
+                }
+                setValueId(Long.valueOf(pref.getInt(mKey, defa)));
                 break;
         }
     }
@@ -707,6 +714,7 @@ public class TitleSpinner extends LinearLayout {
         } else {
             mValue.setText(value);
         }
+
         if (mType == Type.TS_SPINNER_TXT) {
             if (mSpinner.getAdapter() != null) {
                 int intVal = find(mSpinner.getAdapter(), value);
@@ -717,7 +725,11 @@ public class TitleSpinner extends LinearLayout {
         if (mKey == null || !savePreferences)
             return;
         Editor pref = PreferenceManager.getDefaultSharedPreferences(mContext).edit();
-        pref.putString(mKey, value);
+        if (mType == Type.TS_SPINNER_TXT_ID) {
+            pref.putInt(mKey, mValueId.intValue());
+        } else {
+            pref.putString(mKey, value);
+        }
         pref.commit();
     }
 
@@ -801,7 +813,7 @@ public class TitleSpinner extends LinearLayout {
         if (mSpinner.getAdapter() != null) {
             name = nameById(mSpinner.getAdapter(), value);
         }
-        setValue(name);
+        setValue(name, true);
     }
 
     public void setValueDate(Date d) { mValueDate = d; }
