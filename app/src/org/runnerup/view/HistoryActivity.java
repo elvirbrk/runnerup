@@ -267,22 +267,22 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
     };
 
     private Date getPeriodStart() {
-        String per = graphPeriod.getValue().toString();
+        Integer per = graphPeriod.getValueInt();
         Calendar c = Calendar.getInstance();
         switch (per) {
-            case "Last week":
+            case 0:
                 c.add(Calendar.DATE, -7);
                 break;
-            case "Last month":
+            case 1:
                 c.add(Calendar.MONTH, -1);
                 break;
-            case "Last 6 months":
+            case 2:
                 c.add(Calendar.MONTH, -6);
                 break;
-            case "Last year":
+            case 3:
                 c.add(Calendar.YEAR, -1);
                 break;
-            case "All":
+            case 4:
                 return null;
         }
 

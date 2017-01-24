@@ -16,6 +16,7 @@
   ~  along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:runnerup="http://schemas.android.com/apk/res-auto"
     android:id="@+id/tab_graph"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -35,6 +36,7 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:entries="@array/graphEntries"
+            runnerup:values="@array/graphEntryValues"
             android:prompt="@string/Type"
             android:text="@string/graphPeriod" />
     </LinearLayout>
