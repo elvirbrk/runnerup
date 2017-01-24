@@ -16,6 +16,7 @@
   ~  along with this program.  If not, see <http://www.gnu.org/licenses/>.
   -->
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:runnerup="http://schemas.android.com/apk/res-auto"
     android:id="@+id/tab_sport_graph"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -50,8 +51,9 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:entries="@array/sportGraphEntries"
+            runnerup:values="@array/sportGraphEntryValues"
             android:prompt="@string/Type"
-            android:text="@string/sportGraphPeriod" />
+            android:text="@string/sportGraphPeriod"/>
         <org.runnerup.widget.TitleSpinner
             android:id="@+id/sport_graph_groupby"
             android:layout_width="match_parent"
@@ -59,8 +61,9 @@
             android:layout_alignParentLeft="true"
             android:layout_alignParentTop="true"
             android:entries="@array/sportGraphGroupBy"
+            runnerup:values="@array/sportGraphGroupByValues"
             android:prompt="@string/Type"
-            android:text="@string/sportGraphGroupBy" />
+            android:text="@string/sportGraphGroupBy"/>
     </LinearLayout>
 
 </ScrollView>

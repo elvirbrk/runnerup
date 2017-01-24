@@ -80,6 +80,20 @@
     <item>sv</item>
     <item>tr</item>
    </string-array>
+  <integer-array name="sportGraphEntryValues" translatable="false">
+    <item>0</item>
+    <item>1</item>
+    <item>2</item>
+    <item>3</item>
+    <item>4</item>
+  </integer-array>
+
+  <integer-array name="sportGraphGroupByValues" translatable="false">
+    <item>0</item>
+    <item>1</item>
+    <item>2</item>
+    <item>3</item>
+  </integer-array>
   <integer-array name="graphEntryValues" translatable="false">
     <item>0</item>
     <item>1</item>

@@ -330,22 +330,22 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
     };
 
     private Date getSportPeriodStart() {
-        String per = sportGraphPeriod.getValue().toString();
+        Integer per = sportGraphPeriod.getValueInt();
         Calendar c = Calendar.getInstance();
         switch (per) {
-            case "Last week":
+            case 0:
                 c.add(Calendar.DATE, -7);
                 break;
-            case "Last month":
+            case 1:
                 c.add(Calendar.MONTH, -1);
                 break;
-            case "Last 6 months":
+            case 2:
                 c.add(Calendar.MONTH, -6);
                 break;
-            case "Last year":
+            case 3:
                 c.add(Calendar.YEAR, -1);
                 break;
-            case "All":
+            case 4:
                 return null;
         }
 
@@ -353,19 +353,19 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
     };
 
     private String getSportGroupBy() {
-        String per = sportGraphGroupBy.getValue().toString();
+        Integer per = sportGraphGroupBy.getValueInt();
         String s = "";
         switch (per) {
-            case "Day":
+            case 0:
                 s = "strftime('%s', strftime('%Y-%m-%d 00:00:00', "+DB.ACTIVITY.START_TIME+",'unixepoch'))";
                 break;
-            case "Week":
+            case 1:
                 s = "strftime('%s', date( "+DB.ACTIVITY.START_TIME+",'unixepoch', 'weekday 0', '-6 days'))";
                 break;
-            case "Month":
+            case 2:
                 s = "strftime('%s', strftime('%Y-%m-01 00:00:00', "+DB.ACTIVITY.START_TIME+",'unixepoch'))";
                 break;
-            case "Year":
+            case 3:
                 s = "strftime('%s', strftime('%Y-01-01 00:00:00', "+DB.ACTIVITY.START_TIME+",'unixepoch'))";
                 break;
             default:
@@ -376,45 +376,45 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
     };
 
     private LabelDateFormat getLabelFormat() {
-        String gr = sportGraphGroupBy.getValue().toString();
-        String per = sportGraphPeriod.getValue().toString();
+        Integer gr = sportGraphGroupBy.getValueInt();
+        Integer per = sportGraphPeriod.getValueInt();
 
-        if(per.equals("Last week")){
-            if(gr.equals("Day"))
+        if(per == 0){
+            if(gr == 0)
                 return new LabelDateFormat("E", 6);
-            else if (gr.equals("Week"))
+            else if (gr == 1)
                 return new LabelDateFormat("W-MM", 3);
-            else if (gr.equals("Month"))
+            else if (gr == 2)
                 return new LabelDateFormat("MMM", 2);
             else
                 return new LabelDateFormat("yyyy", 2);
-        } else if (per.equals("Last month")){
-            if(gr.equals("Day"))
+        } else if (per == 1){
+            if(gr == 0)
                 return new LabelDateFormat("dd", 6);
-            else if (gr.equals("Week"))
+            else if (gr == 1)
                 return new LabelDateFormat("W-MM", 5);
-            else if (gr.equals("Month"))
+            else if (gr == 2)
                 return new LabelDateFormat("MMM", 3);
             else
                 return new LabelDateFormat("yyyy", 2);
-        } else if (per.equals("Last 6 months")){
-            if(gr.equals("Day") || gr.equals("Week"))
+        } else if (per == 2){
+            if(gr == 0 || gr == 1)
                 return new LabelDateFormat("MMM", 6);
-            else if (gr.equals("Month"))
+            else if (gr == 2)
                 return new LabelDateFormat("MMM", 6);
             else
                 return new LabelDateFormat("yyyy", 2);
-        } else if (per.equals("Last year")){
-            if(gr.equals("Day") || gr.equals("Week") || gr.equals("Month"))
+        } else if (per == 3){
+            if(gr == 0 || gr == 1 || gr == 2)
                 return new LabelDateFormat("MMM", 7);
              else
                 return new LabelDateFormat("yyyy", 3);
         } else {
-            if(gr.equals("Day"))
+            if(gr == 0)
                 return new LabelDateFormat("dd/MM", 4);
-            else if (gr.equals("Week"))
+            else if (gr == 1)
                 return new LabelDateFormat("W-MM", 4);
-            else if (gr.equals("Month"))
+            else if (gr == 2)
                 return new LabelDateFormat("MMM", 4);
             else
                 return new LabelDateFormat("yyyy", 2);
