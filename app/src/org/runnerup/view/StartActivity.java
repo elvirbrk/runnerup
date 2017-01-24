@@ -93,6 +93,7 @@ import org.runnerup.workout.WorkoutSerializer;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -1079,12 +1080,13 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         public void onClick(View v) {
             ContentValues save = new ContentValues();
             int sport = manualSport.getValueId().intValue();
-            CharSequence date = manualDate.getValue();
-            CharSequence time = manualTime.getValue();
+            Date date = manualDate.getValueDate();
+            Date time = manualTime.getValueDate();
             CharSequence distance = manualDistance.getValue();
             CharSequence duration = manualDuration.getValue();
             String notes = manualNotes.getText().toString().trim();
             long start_time = 0;
+			Calendar c = Calendar.getInstance();
 
             if (notes.length() > 0) {
                 save.put(DB.ACTIVITY.COMMENT, notes);
@@ -1100,21 +1102,19 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
                 secs = SafeParse.parseSeconds(duration.toString(), 0);
                 save.put(DB.ACTIVITY.TIME, secs);
             }
-            if (date.length() > 0) {
-                DateFormat df = android.text.format.DateFormat.getDateFormat(StartActivity.this);
-                try {
-                    Date d = df.parse(date.toString());
-                    start_time += d.getTime() / 1000;
-                } catch (ParseException e) {
-                }
+            if (date != null) {
+
+                c.setTime(date);
+
             }
-            if (time.length() > 0) {
-                DateFormat df = android.text.format.DateFormat.getTimeFormat(StartActivity.this);
-                try {
-                    Date d = df.parse(time.toString());
-                    start_time += d.getTime() / 1000;
-                } catch (ParseException e) {
-                }
+            if (time != null) {
+
+                c.set(Calendar.HOUR_OF_DAY, time.getHours());
+                c.set(Calendar.MINUTE, time.getMinutes());
+                c.set(Calendar.SECOND, time.getSeconds());
+
+                start_time = c.getTimeInMillis()/1000;
+
             }
             save.put(DB.ACTIVITY.START_TIME, start_time);
 
