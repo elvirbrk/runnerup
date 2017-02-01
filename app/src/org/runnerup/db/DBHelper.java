@@ -65,7 +65,7 @@ import java.util.List;
 public class DBHelper extends SQLiteOpenHelper implements
         Constants {
 
-    private static final int DBVERSION = 31;
+    private static final int DBVERSION = 32;
     private static final String DBNAME = "runnerup.db";
 
     //DBVERSION update
@@ -113,6 +113,30 @@ public class DBHelper extends SQLiteOpenHelper implements
             + (DB.LOCATION.SPEED + " real, ")
             + (DB.LOCATION.BEARING + " real, ")
             + (DB.LOCATION.SATELLITES + " integer ")
+            + ");";
+
+    private static final String CREATE_TABLE_LOCATION_KALMAN = "create table "
+            + DB.LOCATION_KALMAN.TABLE + " ( "
+            + ("_id integer primary key autoincrement, ")
+            + (DB.LOCATION_KALMAN.ACTIVITY + " integer not null, ")
+            + (DB.LOCATION_KALMAN.LAP + " integer not null, ")
+            + (DB.LOCATION_KALMAN.TYPE + " integer not null, ")
+            + (DB.LOCATION_KALMAN.TIME + " integer not null, ")
+            + (DB.LOCATION_KALMAN.LONGITUDE + " real not null, ")
+            + (DB.LOCATION_KALMAN.LATITUDE + " real not null, ")
+            + (DB.LOCATION_KALMAN.ALTITUDE + " real, ")
+            + (DB.LOCATION_KALMAN.HR + " integer, ")
+            + (DB.LOCATION_KALMAN.CADENCE + " real, ")
+            + (DB.LOCATION_KALMAN.TEMPERATURE + " real, ")
+            + (DB.LOCATION_KALMAN.PRESSURE + " real, ")
+            + (DB.LOCATION_KALMAN.ELAPSED + " real, ")
+            + (DB.LOCATION_KALMAN.DISTANCE + " real, ")
+            //Additional data, uses one byte for null data
+            + (DB.LOCATION_KALMAN.GPS_ALTITUDE + " real, ")
+            + (DB.LOCATION_KALMAN.ACCURANCY + " real, ")
+            + (DB.LOCATION_KALMAN.SPEED + " real, ")
+            + (DB.LOCATION_KALMAN.BEARING + " real, ")
+            + (DB.LOCATION_KALMAN.SATELLITES + " integer ")
             + ");";
 
     private static final String CREATE_TABLE_LAP = "create table "
@@ -245,6 +269,7 @@ public class DBHelper extends SQLiteOpenHelper implements
         arg0.execSQL(CREATE_TABLE_AUDIO_SCHEMES);
         arg0.execSQL(CREATE_TABLE_FEED);
         arg0.execSQL(CREATE_INDEX_FEED);
+        arg0.execSQL(CREATE_TABLE_LOCATION_KALMAN);
 
         onCreateUpgrade(arg0, 0, DBVERSION);
     }
@@ -331,6 +356,10 @@ public class DBHelper extends SQLiteOpenHelper implements
                     + " real");
             echoDo(arg0, "alter table " + DB.ACTIVITY.TABLE + " add column " + DB.ACTIVITY.META_DATA
                     + " text");
+        }
+
+        if (oldVersion < 32) {
+            arg0.execSQL(CREATE_TABLE_LOCATION_KALMAN);
         }
 
         //DBVERSION update
