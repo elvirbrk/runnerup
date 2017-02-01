@@ -58,6 +58,7 @@ import org.runnerup.tracker.component.TrackerTemperature;
 import org.runnerup.tracker.component.TrackerPressure;
 import org.runnerup.tracker.component.TrackerTTS;
 import org.runnerup.tracker.component.TrackerWear;
+import org.runnerup.tracker.filter.KalmanLatLong;
 import org.runnerup.tracker.filter.PersistentGpsLoggerListener;
 import org.runnerup.util.Formatter;
 import org.runnerup.util.HRZones;
@@ -134,6 +135,8 @@ public class Tracker extends android.app.Service implements
 
     SQLiteDatabase mDB = null;
     PersistentGpsLoggerListener mDBWriter = null;
+    PersistentGpsLoggerListener mDBWriterKalman = null;
+    KalmanLatLong mKalman = null;
     PowerManager.WakeLock mWakeLock = null;
     final List<WorkoutObserver> liveLoggers = new ArrayList<WorkoutObserver>();
 
@@ -335,6 +338,23 @@ public class Tracker extends android.app.Service implements
         tmp.put(DB.LOCATION.ACTIVITY, mActivityId);
         tmp.put(DB.LOCATION.LAP, 0); // always start with lap 0
         mDBWriter = new PersistentGpsLoggerListener(mDB, DB.LOCATION.TABLE, tmp, logGpxAccuracy);
+        mDBWriterKalman = new PersistentGpsLoggerListener(mDB, DB.LOCATION_KALMAN.TABLE, tmp, logGpxAccuracy);
+
+        float q = 3;
+        switch (sport) {
+            case DB.ACTIVITY.SPORT_BIKING:
+                q = 10;
+                break;
+            case DB.ACTIVITY.SPORT_RUNNING:
+                q = 5;
+                break;
+            default:
+                q = 3;
+                break;
+        }
+
+        mKalman = new KalmanLatLong(q);
+
         return mActivityId;
     }
 
@@ -418,6 +438,10 @@ public class Tracker extends android.app.Service implements
         ContentValues key = mDBWriter.getKey();
         key.put(DB.LOCATION.LAP, tmp.getAsLong(DB.LAP.LAP));
         mDBWriter.setKey(key);
+
+        ContentValues key2 = mDBWriterKalman.getKey();
+        key2.put(DB.LOCATION_KALMAN.LAP, tmp.getAsLong(DB.LAP.LAP));
+        mDBWriterKalman.setKey(key2);
     }
 
     public void saveLap(ContentValues tmp) {
@@ -630,6 +654,9 @@ public class Tracker extends android.app.Service implements
         ContentValues key = mDBWriter.getKey();
         key.put(DB.LOCATION.TYPE, newType);
         mDBWriter.setKey(key);
+        ContentValues key2 = mDBWriterKalman.getKey();
+        key2.put(DB.LOCATION_KALMAN.TYPE, newType);
+        mDBWriterKalman.setKey(key2);
         mLocationType = newType;
     }
 
@@ -705,6 +732,10 @@ public class Tracker extends android.app.Service implements
             mActivityLastLocation = arg0;
 
             mDBWriter.onLocationChanged(arg0, eleValue, mElapsedTimeMillis, mElapsedDistance, hrValue, cadValue, temperatureValue, pressureValue);
+
+            mKalman.Process(arg0.getLatitude(), arg0.getLongitude(), arg0.getAccuracy(), arg0.getTime());
+
+            mDBWriterKalman.onLocationChanged(mKalman.getLocation(), eleValue, mElapsedTimeMillis, mElapsedDistance, hrValue, cadValue, temperatureValue, pressureValue);
 
             switch (mLocationType) {
                 case DB.LOCATION.TYPE_START:
