@@ -100,7 +100,8 @@ public class MapWrapper implements Constants {
             public void onMapReady(MapboxMap mapboxMap) {
                 map = mapboxMap;
                 setStyle();
-                new LoadRoute().execute(new LoadParam(context, mDB, mID));
+                new LoadRoute().execute(new LoadParam(context, mDB, mID, false));
+                new LoadRoute().execute(new LoadParam(context, mDB, mID, true));
             }
         });
     }
@@ -137,18 +138,21 @@ public class MapWrapper implements Constants {
     class Route {
         final List<LatLng> path = new ArrayList<>(10);
         final ArrayList<MarkerViewOptions> markers = new ArrayList<>(10);
+        public boolean kalman = false;
     }
 
     private class LoadParam {
-        LoadParam(Context context, SQLiteDatabase mDB, long mID) {
+        LoadParam(Context context, SQLiteDatabase mDB, long mID, boolean kalman) {
             this.context = context;
             this.mDB = mDB;
             this.mID = mID;
+            this.kalman = kalman;
         }
 
         final Context context;
         final SQLiteDatabase mDB;
         final long mID;
+        final boolean kalman;
     }
 
     private class LoadRoute extends AsyncTask<LoadParam, Void, Route> {
@@ -156,7 +160,8 @@ public class MapWrapper implements Constants {
         protected Route doInBackground(LoadParam... params) {
 
             Route route = new Route();
-            LocationEntity.LocationList<LocationEntity> ll = new LocationEntity.LocationList<>(params[0].mDB, params[0].mID);
+            route.kalman = params[0].kalman;
+            LocationEntity.LocationList<LocationEntity> ll = new LocationEntity.LocationList<>(params[0].mDB, params[0].mID, params[0].kalman);
             IconFactory iconFactory = IconFactory.getInstance(params[0].context);
 
             int lastLap = 0;
@@ -228,12 +233,11 @@ public class MapWrapper implements Constants {
                     android.os.Build.VERSION.SDK_INT > Build.VERSION_CODES.ICE_CREAM_SANDWICH) {
 
                 if (route.path.size() > 1) {
-
                     LatLng[] pointsArray = new LatLng[route.path.size()];
                     route.path.toArray(pointsArray);
                     map.addPolyline(new PolylineOptions()
                             .add(pointsArray)
-                            .color(Color.RED)
+                            .color(route.kalman?Color.GREEN:Color.RED)
                             .width(3));
                     Log.v(getClass().getName(), "Added polyline");
 

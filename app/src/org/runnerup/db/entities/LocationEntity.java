@@ -80,16 +80,18 @@ public class LocationEntity extends AbstractEntity {
         LocationIterator iter;
         final long mID;
         final SQLiteDatabase mDB;
+        final boolean mKalman;
 
-        public LocationList(SQLiteDatabase mDB, long mID) {
+        public LocationList(SQLiteDatabase mDB, long mID, boolean mKalman) {
             this.mID = mID;
             this.mDB = mDB;
+            this.mKalman = mKalman;
         }
 
         @Override
         @SuppressWarnings("unchecked")
         public Iterator<E> iterator() {
-            iter = new LocationIterator(this.mID, this.mDB);
+            iter = new LocationIterator(this.mID, this.mDB, this.mKalman);
             return iter;
         }
 
@@ -102,8 +104,9 @@ public class LocationEntity extends AbstractEntity {
         }
 
         private class LocationIterator implements Iterator<E> {
-            private LocationIterator(long mID, SQLiteDatabase mDB) {
-                c = mDB.query(Constants.DB.LOCATION.TABLE, from, "activity_id == " + mID,
+            private LocationIterator(long mID, SQLiteDatabase mDB, boolean mKalman) {
+                String table = mKalman ? Constants.DB.LOCATION_KALMAN.TABLE : Constants.DB.LOCATION.TABLE;
+                c = mDB.query(table, from, "activity_id == " + mID,
                         null, null, null, "_id", null);
                 if (!c.moveToFirst()) {
                     c.close();

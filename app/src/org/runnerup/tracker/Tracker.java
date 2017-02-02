@@ -340,6 +340,12 @@ public class Tracker extends android.app.Service implements
         mDBWriter = new PersistentGpsLoggerListener(mDB, DB.LOCATION.TABLE, tmp, logGpxAccuracy);
         mDBWriterKalman = new PersistentGpsLoggerListener(mDB, DB.LOCATION_KALMAN.TABLE, tmp, logGpxAccuracy);
 
+        initKalman(sport);
+
+        return mActivityId;
+    }
+
+    private void initKalman(int sport) {
         float q = 3;
         switch (sport) {
             case DB.ACTIVITY.SPORT_BIKING:
@@ -354,8 +360,6 @@ public class Tracker extends android.app.Service implements
         }
 
         mKalman = new KalmanLatLong(q);
-
-        return mActivityId;
     }
 
     public void setWorkout(Workout workout) {
