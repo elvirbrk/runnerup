@@ -50,6 +50,7 @@ import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ListView;
+import android.widget.Spinner;
 import android.widget.TabHost;
 import android.widget.TabHost.OnTabChangeListener;
 import android.widget.TabHost.TabSpec;
@@ -83,6 +84,7 @@ import org.runnerup.widget.NameIdAdapter;
 import org.runnerup.widget.TitleSpinner;
 import org.runnerup.widget.TitleSpinner.OnCloseDialogListener;
 import org.runnerup.widget.TitleSpinner.OnSetValueListener;
+import org.runnerup.widget.TitleSpinner.OnSelectedListener;
 import org.runnerup.widget.WidgetUtil;
 import org.runnerup.workout.Dimension;
 import org.runnerup.workout.Workout;
@@ -154,6 +156,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
     boolean manualSetValue = false;
     TitleSpinner manualSport = null;
+    TitleSpinner manualSportIntensity = null;
     TitleSpinner manualDate = null;
     TitleSpinner manualTime = null;
     TitleSpinner manualDistance = null;
@@ -291,6 +294,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         });
 
         manualSport = (TitleSpinner) findViewById(R.id.manual_sport);
+        manualSportIntensity = (TitleSpinner) findViewById(R.id.manual_sport_intensity);
         manualDate = (TitleSpinner) findViewById(R.id.manual_date);
         manualDate.setOnSetValueListener(onSetValueManual);
         manualTime = (TitleSpinner) findViewById(R.id.manual_time);
@@ -302,6 +306,8 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         manualPace = (TitleSpinner) findViewById(R.id.manual_pace);
         manualPace.setVisibility(View.GONE);
         manualNotes = (EditText) findViewById(R.id.manual_notes);
+
+        manualSport.setOnSelectedListener(onSetManualSport);
 
         if (getParent() != null && getParent().getIntent() != null) {
             Intent i = getParent().getIntent();
@@ -1080,6 +1086,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         public void onClick(View v) {
             ContentValues save = new ContentValues();
             int sport = manualSport.getValueId().intValue();
+            int intensity = manualSportIntensity.getValueId().intValue();
             Date date = manualDate.getValueDate();
             Date time = manualTime.getValueDate();
             CharSequence distance = manualDistance.getValue();
@@ -1119,7 +1126,8 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
             save.put(DB.ACTIVITY.START_TIME, start_time);
 
             save.put(DB.ACTIVITY.SPORT, sport);
-            save.put(DB.ACTIVITY.CALORIES, CaloriesEntity.getCaloriesConsumption(mDB, sport, (int)(secs/60)));
+            save.put(DB.ACTIVITY.INTENSITY, intensity);
+            save.put(DB.ACTIVITY.CALORIES, CaloriesEntity.getCaloriesConsumption(mDB, intensity, (int)(secs/60)));
             long id = mDB.insert(DB.ACTIVITY.TABLE, null, save);
 
             ContentValues lap = new ContentValues();
@@ -1148,6 +1156,38 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
         // attaching data adapter to spinner
         manualSport.setAdapter(dataAdapter);
+    }
+
+    final OnSelectedListener onSetManualSport = new OnSelectedListener() {
+
+        @Override
+        public void onSelected(Spinner spiner, int newValue) throws IllegalArgumentException {
+            Long pos = manualSport.getValueId();
+
+            //loadHealthValueTypes(pos);
+
+
+            loadSportIntensity(pos);
+
+        }
+
+    };
+
+    private void loadSportIntensity(Long pos) {
+        SportEntity se = new SportEntity();
+        se.readByPrimaryKey(mDB, pos);
+
+        List<? extends  AbstractTypeEntity> intensities = se.getSportIntensities();
+
+        // Creating adapter for spinner
+        NameIdAdapter dataAdapter = new NameIdAdapter(this,android.R.layout.simple_spinner_item, intensities.toArray(new AbstractTypeEntity[intensities.size()]));
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        manualSportIntensity.setAdapter(dataAdapter);
+
     }
 
 

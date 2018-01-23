@@ -73,6 +73,7 @@
   <string name="Download_workouts">Download workouts</string>
   <string name="Audio_cue_settings">Audio cue settings</string>
   <string name="Sport">Sport</string>
+  <string name="Intensity">Intensity</string>
   <string name="Target">Target</string>
   <string name="Target_heart_rate_zone">Target heart rate zone</string>
   <string name="Interval_type">Interval type</string>

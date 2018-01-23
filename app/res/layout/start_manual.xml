@@ -34,10 +34,19 @@
         runnerup:type="spinner_txt_id"/>
 
     <org.runnerup.widget.TitleSpinner
-        android:id="@+id/manual_date"
+        android:id="@+id/manual_sport_intensity"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_below="@+id/manual_sport"
+        android:prompt="@string/Type"
+        android:text="@string/Intensity"
+        runnerup:type="spinner_txt_id"/>
+
+    <org.runnerup.widget.TitleSpinner
+        android:id="@+id/manual_date"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/manual_sport_intensity"
         android:prompt="@string/Type"
         android:defaultValue="today"
         android:text="@string/Date"
