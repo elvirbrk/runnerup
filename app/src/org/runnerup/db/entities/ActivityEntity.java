@@ -189,6 +189,29 @@ public class ActivityEntity extends AbstractEntity {
         return null;
     }
 
+
+    public void setCalories(Integer value) {
+        values().put(Constants.DB.ACTIVITY.CALORIES, value);
+    }
+
+    public Integer getCalories() {
+        if (values().containsKey(Constants.DB.ACTIVITY.CALORIES)) {
+            return values().getAsInteger(Constants.DB.ACTIVITY.CALORIES);
+        }
+        return null;
+    }
+
+    public void setSportIntensity(Integer value) {
+        values().put(Constants.DB.ACTIVITY.INTENSITY, value);
+    }
+
+    public Integer getSportIntensity() {
+        if (values().containsKey(Constants.DB.ACTIVITY.INTENSITY)) {
+            return values().getAsInteger(Constants.DB.ACTIVITY.INTENSITY);
+        }
+        return null;
+    }
+
     /**
      * Status of the activity
      */
@@ -224,6 +247,7 @@ public class ActivityEntity extends AbstractEntity {
         columns.add(Constants.DB.ACTIVITY.MAX_HR);
         columns.add(Constants.DB.ACTIVITY.AVG_HR);
         columns.add(Constants.DB.ACTIVITY.AVG_CADENCE);
+        columns.add(Constants.DB.ACTIVITY.CALORIES);
         columns.add(Constants.DB.ACTIVITY.DELETED);
         columns.add(Constants.DB.ACTIVITY.NULLCOLUMNHACK);
         return columns;

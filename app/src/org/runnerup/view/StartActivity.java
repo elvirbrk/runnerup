@@ -77,6 +77,12 @@ import org.runnerup.db.entities.HealthTypeEntity;
 import org.runnerup.db.entities.HealthValueEntity;
 import org.runnerup.db.entities.HealthValueTypeEntity;
 import org.runnerup.db.entities.UnitEntity;
+
+
+
+import org.runnerup.db.entities.CaloriesEntity;
+import org.runnerup.db.entities.SportEntity;
+
 import org.runnerup.hr.MockHRProvider;
 import org.runnerup.notification.GpsBoundState;
 import org.runnerup.notification.GpsSearchingState;
@@ -145,6 +151,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
     TitleSpinner simpleAudioSpinner = null;
     AudioSchemeListAdapter simpleAudioListAdapter = null;
+    TitleSpinner simpleSport = null;
     TitleSpinner simpleTargetType = null;
     TitleSpinner simpleTargetPaceValue = null;
     TitleSpinner simpleTargetHrz = null;
@@ -171,6 +178,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
     boolean manualSetValue = false;
     boolean healthSetValue = false;
     TitleSpinner manualSport = null;
+    TitleSpinner manualSportIntensity = null;
     TitleSpinner manualDate = null;
     TitleSpinner manualTime = null;
     TitleSpinner manualDistance = null;
@@ -263,6 +271,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         simpleAudioListAdapter.reload();
         simpleAudioSpinner = (TitleSpinner) findViewById(R.id.basic_audio_cue_spinner);
         simpleAudioSpinner.setAdapter(simpleAudioListAdapter);
+        simpleSport = (TitleSpinner) findViewById(R.id.basic_sport);
         simpleTargetType = (TitleSpinner) findViewById(R.id.tab_basic_target_type);
         simpleTargetPaceValue = (TitleSpinner) findViewById(R.id.tab_basic_target_pace_max);
         hrZonesAdapter = new HRZonesListAdapter(this, inflater);
@@ -322,6 +331,7 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         });
 
         manualSport = (TitleSpinner) findViewById(R.id.manual_sport);
+        manualSportIntensity = (TitleSpinner) findViewById(R.id.manual_sport_intensity);
         manualDate = (TitleSpinner) findViewById(R.id.manual_date);
         manualDate.setOnSetValueListener(onSetValueManual);
         manualTime = (TitleSpinner) findViewById(R.id.manual_time);
@@ -343,6 +353,8 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         healthType.setOnSelectedListener(onSetHealthType);
         //healthValueType.setOnSelectedListener(onSetHealthValueType);
 
+        manualSport.setOnSelectedListener(onSetManualSport);
+
         if (getParent() != null && getParent().getIntent() != null) {
             Intent i = getParent().getIntent();
             if (i.hasExtra("mode")) {
@@ -356,6 +368,9 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         updateTargetView();
         
         loadHealthTypes();
+
+        loadManualSports();
+        loadBasicSports();
     }
 
 
@@ -1148,13 +1163,15 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
         @Override
         public void onClick(View v) {
             ContentValues save = new ContentValues();
-            int sport = manualSport.getValueInt();
-            CharSequence date = manualDate.getValue();
-            CharSequence time = manualTime.getValue();
+            int sport = manualSport.getValueId().intValue();
+            int intensity = manualSportIntensity.getValueId().intValue();
+            Date date = manualDate.getValueDate();
+            Date time = manualTime.getValueDate();
             CharSequence distance = manualDistance.getValue();
             CharSequence duration = manualDuration.getValue();
             String notes = manualNotes.getText().toString().trim();
             long start_time = 0;
+			Calendar c = Calendar.getInstance();
 
             if (notes.length() > 0) {
                 save.put(DB.ACTIVITY.COMMENT, notes);
@@ -1170,25 +1187,25 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
                 secs = SafeParse.parseSeconds(duration.toString(), 0);
                 save.put(DB.ACTIVITY.TIME, secs);
             }
-            if (date.length() > 0) {
-                DateFormat df = android.text.format.DateFormat.getDateFormat(StartActivity.this);
-                try {
-                    Date d = df.parse(date.toString());
-                    start_time += d.getTime() / 1000;
-                } catch (ParseException e) {
-                }
+            if (date != null) {
+
+                c.setTime(date);
+
             }
-            if (time.length() > 0) {
-                DateFormat df = android.text.format.DateFormat.getTimeFormat(StartActivity.this);
-                try {
-                    Date d = df.parse(time.toString());
-                    start_time += d.getTime() / 1000;
-                } catch (ParseException e) {
-                }
+            if (time != null) {
+
+                c.set(Calendar.HOUR_OF_DAY, time.getHours());
+                c.set(Calendar.MINUTE, time.getMinutes());
+                c.set(Calendar.SECOND, time.getSeconds());
+
+                start_time = c.getTimeInMillis()/1000;
+
             }
             save.put(DB.ACTIVITY.START_TIME, start_time);
 
             save.put(DB.ACTIVITY.SPORT, sport);
+            save.put(DB.ACTIVITY.INTENSITY, intensity);
+            save.put(DB.ACTIVITY.CALORIES, CaloriesEntity.getCaloriesConsumption(mDB, intensity, (int)(secs/60)));
             long id = mDB.insert(DB.ACTIVITY.TABLE, null, save);
 
             ContentValues lap = new ContentValues();
@@ -1431,6 +1448,62 @@ public class StartActivity extends Activity implements TickListener, GpsInformat
 
         // attaching data adapter to spinner
         healthType.setAdapter(dataAdapter);
+    }
+
+
+
+
+    private void loadSports(TitleSpinner ts, String column, String filter) {
+        List<AbstractTypeEntity> types = SportEntity.getAll(mDB, column, filter);
+
+        // Creating adapter for spinner
+        NameIdAdapter dataAdapter = new NameIdAdapter(this,android.R.layout.simple_spinner_item, types.toArray(new AbstractTypeEntity[types.size()]));
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        ts.setAdapter(dataAdapter);
+    }
+
+    private void loadManualSports() {
+        loadSports(manualSport, "1", "1");
+    }
+
+    private void loadBasicSports() {
+        loadSports(simpleSport, DB.SPORT.GPS, "1");
+    }
+
+    final OnSelectedListener onSetManualSport = new OnSelectedListener() {
+
+        @Override
+        public void onSelected(Spinner spiner, int newValue) throws IllegalArgumentException {
+            Long pos = manualSport.getValueId();
+
+            //loadHealthValueTypes(pos);
+
+
+            loadSportIntensity(pos);
+
+        }
+
+    };
+
+    private void loadSportIntensity(Long pos) {
+        SportEntity se = new SportEntity();
+        se.readByPrimaryKey(mDB, pos);
+
+        List<? extends  AbstractTypeEntity> intensities = se.getSportIntensities();
+
+        // Creating adapter for spinner
+        NameIdAdapter dataAdapter = new NameIdAdapter(this,android.R.layout.simple_spinner_item, intensities.toArray(new AbstractTypeEntity[intensities.size()]));
+
+        // Drop down layout style - list view with radio button
+        dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // attaching data adapter to spinner
+        manualSportIntensity.setAdapter(dataAdapter);
+
     }
 
 

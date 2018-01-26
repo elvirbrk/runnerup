@@ -16,6 +16,7 @@
   ~  along with this program.  If not, see <http://www.gnu.org/licenses/>.
 -->
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:runnerup="http://schemas.android.com/apk/res-auto"
     android:id="@+id/tab1_layout"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
@@ -39,6 +40,12 @@
             style="@style/RunHeader"
             android:gravity="right"
             android:text="@string/distance" />
+
+        <TextView
+            android:id="@+id/total_calories"
+            style="@style/RunHeader"
+            android:gravity="right"
+            android:text="@string/calories" />
 
         <TextView
             android:id="@+id/total_pace"
@@ -83,6 +90,10 @@
                 style="@style/RunInfo" />
 
             <TextView
+                android:id="@+id/activity_calories"
+                style="@style/RunInfo" />
+
+            <TextView
                 android:id="@+id/activity_pace"
                 style="@style/RunInfo"
                 android:layout_marginRight="3dp" />
@@ -123,9 +134,18 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="1px"
-                        android:entries="@array/sportEntries"
                         android:prompt="@string/Type"
-                        android:text="@string/Sport" />
+                        android:text="@string/Sport"
+                        runnerup:type="spinner_txt_id"/>
+
+                    <org.runnerup.widget.TitleSpinner
+                        android:id="@+id/summary_sport_intensity"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@+id/manual_sport"
+                        android:prompt="@string/Type"
+                        android:text="@string/Intensity"
+                        runnerup:type="spinner_txt_id"/>
 
                     <EditText
                         android:id="@+id/notes_text"

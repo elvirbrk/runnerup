@@ -67,6 +67,7 @@ import org.runnerup.db.entities.HealthEntryEntity;
 import org.runnerup.db.entities.HealthTypeEntity;
 import org.runnerup.db.entities.HealthValueEntity;
 import org.runnerup.db.entities.HealthValueTypeEntity;
+import org.runnerup.db.entities.SportEntity;
 import org.runnerup.util.Formatter;
 import org.runnerup.util.SimpleCursorLoader;
 import org.runnerup.widget.TitleSpinner;
@@ -175,7 +176,7 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
     public Loader<Cursor> onCreateLoader(int arg0, Bundle arg1) {
         String[] from = new String[]{
                 "_id", DB.ACTIVITY.START_TIME,
-                DB.ACTIVITY.DISTANCE, DB.ACTIVITY.TIME, DB.ACTIVITY.SPORT
+                DB.ACTIVITY.DISTANCE, DB.ACTIVITY.TIME, DB.ACTIVITY.SPORT, DB.ACTIVITY.CALORIES
         };
 
         return new SimpleCursorLoader(this, mDB, DB.ACTIVITY.TABLE, from, "deleted == 0", null,
@@ -442,7 +443,8 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
             int[] to = new int[]{
                     R.id.history_list_id,
                     R.id.history_list_start_time, R.id.history_list_distance,
-                    R.id.history_list_time, R.id.history_list_pace, R.id.history_list_sport
+                    R.id.history_list_time, R.id.history_list_pace, R.id.history_list_sport,
+                    R.id.history_list_calories
             };
 
             Long id = ae.getId();
@@ -450,6 +452,9 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
             Float d = ae.getDistance();
             Long t = ae.getTime();
             Integer s = ae.getSport();
+            SportEntity se = new SportEntity();
+            se.readByPrimaryKey(mDB, s);
+            Integer c = ae.getCalories();
 
             {
                 TextView tv = (TextView) view.findViewById(to[0]);
@@ -495,10 +500,25 @@ public class HistoryActivity extends FragmentActivity implements Constants, OnIt
             {
                 TextView tv = (TextView) view.findViewById(to[5]);
 
-                if (s != null) {
-                    tv.setText(Sport.textOf(getResources(), s));
+//                if (s != null) {
+//                    tv.setText(Sport.textOf(getResources(), s));
+//                } else {
+//                    tv.setText(Sport.textOf(getResources(), DB.ACTIVITY.SPORT_RUNNING));
+//                }
+                if (se != null){
+                    tv.setText(se.getName());
                 } else {
-                    tv.setText(Sport.textOf(getResources(), DB.ACTIVITY.SPORT_RUNNING));
+                    tv.setText("Unknown");
+                }
+            }
+
+            {
+                TextView tv = (TextView) view.findViewById(to[6]);
+
+                if (c != null) {
+                    tv.setText(c.toString());
+                } else {
+                    tv.setText("");
                 }
             }
         }

@@ -46,6 +46,7 @@
   <string name="Distance">Distance</string>
   <string name="speed">speed</string>
   <string name="pace">pace</string>
+  <string name="calories">calories</string>
   <string name="heart_rate_zone">heart rate zone</string>
   <string name="cadence">cadence</string>
   <string name="temperature">temperature</string>
@@ -72,6 +73,7 @@
   <string name="Download_workouts">Download workouts</string>
   <string name="Audio_cue_settings">Audio cue settings</string>
   <string name="Sport">Sport</string>
+  <string name="Intensity">Intensity</string>
   <string name="Target">Target</string>
   <string name="Target_heart_rate_zone">Target heart rate zone</string>
   <string name="Interval_type">Interval type</string>
