@@ -142,6 +142,9 @@
     <string name="pref_pressure_elevation_gps_average">pref_pressure_elevation_gps_average</string>
     <string name="pref_log_gpx_accuracy">pref_log_gpx_accuracy</string>
 
+    <string name="pref_use_kalman_for_calculation">pref_use_kalman_for_calculation</string>
+    <string name="pref_kalman_sensitivity">pref_kalman_sensitivity</string>
+
     <string name="pref_experimental_features">pref_experimental_features</string>
 
     <string name="pref_audio_lang">pref_audio_lang</string>

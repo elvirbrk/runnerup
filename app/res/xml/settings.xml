@@ -188,6 +188,20 @@
             android:title="@string/log_extended_gps_title"
             android:summary="@string/log_extended_gps_summary" />
 
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:persistent="true"
+            android:key="@string/pref_use_kalman_for_calculation"
+            android:title="@string/use_kalman_for_calculation_title"
+            android:summary="@string/use_kalman_for_calculation_summary" />
+
+        <org.runnerup.widget.TextPreference
+            android:defaultValue="5"
+            android:inputType="number"
+            android:key="@string/pref_kalman_sensitivity"
+            android:persistent="true"
+            android:title="@string/kalman_sensitivity_title" />
+
     </PreferenceScreen>
 
     <PreferenceScreen

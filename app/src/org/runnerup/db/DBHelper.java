@@ -120,6 +120,30 @@ public class DBHelper extends SQLiteOpenHelper implements
             + (DB.LOCATION.SATELLITES + " integer ")
             + ");";
 
+    private static final String CREATE_TABLE_LOCATION_KALMAN = "create table "
+            + DB.LOCATION_KALMAN.TABLE + " ( "
+            + ("_id integer primary key autoincrement, ")
+            + (DB.LOCATION_KALMAN.ACTIVITY + " integer not null, ")
+            + (DB.LOCATION_KALMAN.LAP + " integer not null, ")
+            + (DB.LOCATION_KALMAN.TYPE + " integer not null, ")
+            + (DB.LOCATION_KALMAN.TIME + " integer not null, ")
+            + (DB.LOCATION_KALMAN.LONGITUDE + " real not null, ")
+            + (DB.LOCATION_KALMAN.LATITUDE + " real not null, ")
+            + (DB.LOCATION_KALMAN.ALTITUDE + " real, ")
+            + (DB.LOCATION_KALMAN.HR + " integer, ")
+            + (DB.LOCATION_KALMAN.CADENCE + " real, ")
+            + (DB.LOCATION_KALMAN.TEMPERATURE + " real, ")
+            + (DB.LOCATION_KALMAN.PRESSURE + " real, ")
+            + (DB.LOCATION_KALMAN.ELAPSED + " real, ")
+            + (DB.LOCATION_KALMAN.DISTANCE + " real, ")
+            //Additional data, uses one byte for null data
+            + (DB.LOCATION_KALMAN.GPS_ALTITUDE + " real, ")
+            + (DB.LOCATION_KALMAN.ACCURANCY + " real, ")
+            + (DB.LOCATION_KALMAN.SPEED + " real, ")
+            + (DB.LOCATION_KALMAN.BEARING + " real, ")
+            + (DB.LOCATION_KALMAN.SATELLITES + " integer ")
+            + ");";
+
     private static final String CREATE_TABLE_LAP = "create table "
             + DB.LAP.TABLE + " ( "
             + ("_id integer primary key autoincrement, ")
@@ -349,6 +373,7 @@ public class DBHelper extends SQLiteOpenHelper implements
         arg0.execSQL(CREATE_TABLE_SPORT);
         arg0.execSQL(CREATE_TABLE_CALORIES);
         arg0.execSQL(CREATE_TABLE_SPORT_INTENSITY);
+        arg0.execSQL(CREATE_TABLE_LOCATION_KALMAN);
 
 
 
@@ -499,8 +524,9 @@ public class DBHelper extends SQLiteOpenHelper implements
                     DB.ACTIVITY.INTENSITY + ")");
 
             arg0.execSQL(CREATE_TABLE_LAST_VALUES);
-         }
 
+            arg0.execSQL(CREATE_TABLE_LOCATION_KALMAN);
+         }
 
 
         //DBVERSION update

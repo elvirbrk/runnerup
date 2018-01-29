@@ -530,7 +530,7 @@ public class GraphWrapper implements Constants {
         @Override
         protected GraphProducer doInBackground(LoadParam... params) {
 
-            LocationEntity.LocationList<LocationEntity> ll = new LocationEntity.LocationList<>(params[0].mDB, params[0].mID);
+            LocationEntity.LocationList<LocationEntity> ll = new LocationEntity.LocationList<>(params[0].mDB, params[0].mID, false);
             GraphProducer graphData = new GraphProducer(params[0].context, ll.getCount());
             double lastDistance = 0;
             long lastTime = 0;
